@@ -536,7 +536,7 @@ function refreshFloorRows(): void {
     if (!message || message.mes == null) return;
     rows.push({
       floor: index,
-      name: message.name || (message.is_user ? 'User' : 'Char'),
+      name: message.name || (message.is_user ? context?.name1 : context?.name2) || (message.is_user ? 'User' : 'Char'),
       isUser: message.is_user === true,
       hidden: message.is_system === true,
     });
@@ -1046,7 +1046,7 @@ const editedAcceptedCount = computed(
 const applyButtonLabel = computed(() => {
   if (saving.value) return 'Saving…';
   if (acceptedCount.value === 0) return 'Discard all';
-  const base = `Apply ${acceptedCount.value} lines`;
+  const base = `Apply ${acceptedCount.value} ${acceptedCount.value === 1 ? 'line' : 'lines'}`;
   return editedAcceptedCount.value > 0 ? `${base} (${editedAcceptedCount.value} manual edits)` : base;
 });
 
@@ -1350,8 +1350,8 @@ const PROMPT_METAS: PromptMeta[] = [
   },
   {
     key: 'chainOfThought',
-    label: 'Chain-of-thought prompt',
-    hint: 'Appended after the final rewrite task so the model reviews first, then returns line patches. Leave empty to use the built-in default.',
+    label: 'Editorial review prompt',
+    hint: 'Appended after the editing task. Requests a brief review of the changes, then paragraph patches. Leave empty to use the built-in default.',
     builtin: CHAIN_OF_THOUGHT_PROMPT,
   },
 ];
@@ -1449,7 +1449,7 @@ function onOverlayClick(event: MouseEvent): void {
               <div v-if="ui.stage === 'annotate'" class="bby-work-tabs bby-status-strip">
                 <span class="bby-strip-meta">
                   <span class="bby-floor-number">{{ ui.floorLabel }}</span>
-                  <span v-if="workMode === 'annotate'">Annotated <b>{{ markedCount }}</b> lines</span>
+                  <span v-if="workMode === 'annotate'">Annotated <b>{{ markedCount }}</b> {{ markedCount === 1 ? 'line' : 'lines' }}</span>
                   <span v-else-if="workMode === 'multi'">Selected <b>{{ multiSelected.length }}</b> paragraphs</span>
                   <span v-else>Edit the original by hand, without AI</span>
                 </span>
@@ -1490,7 +1490,7 @@ function onOverlayClick(event: MouseEvent): void {
                   <strong>{{ ui.speaker }}</strong>
                 </div>
                 <div class="bby-doc-status">
-                  <span>AI suggestions <b>{{ reviewRows.length }}</b> items · selected <b>{{ acceptedCount }}</b> lines</span>
+                  <span>AI suggestions <b>{{ reviewRows.length }}</b> {{ reviewRows.length === 1 ? 'item' : 'items' }} · selected <b>{{ acceptedCount }}</b> {{ acceptedCount === 1 ? 'line' : 'lines' }}</span>
                   <button class="bby-text-action" type="button" @click="backToAnnotate">
                     <Icon name="undo" /> Back to annotations
                   </button>

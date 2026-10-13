@@ -141,8 +141,8 @@ export function serializeRewriteHistory(
       const speaker = message.is_user
         ? message.name || userName || 'User'
         : message.name || characterName || 'Char';
-      const hidden = message.is_system ? '｜ST 隐藏' : '';
-      return `[楼层 #${index}｜${speaker}${hidden}]\n${text}`;
+      const hidden = message.is_system ? ' | ST-hidden' : '';
+      return `[Message #${index} | ${speaker}${hidden}]\n${text}`;
     })
     .join('\n\n');
 
@@ -298,14 +298,14 @@ function fetchCharCard(): string {
       ? context.substituteParams
       : (value: string) => value;
   const fields: Array<[string, string]> = [
-    ['描述', String(character.description ?? '')],
-    ['性格', String(character.personality ?? '')],
-    ['情景', String(character.scenario ?? '')],
+    ['Description', String(character.description ?? '')],
+    ['Personality', String(character.personality ?? '')],
+    ['Scenario', String(character.scenario ?? '')],
   ];
   return fields
     .map(([label, raw]) => {
       const value = substitute(raw).trim();
-      return value ? `【${label}】\n${value}` : '';
+      return value ? `[${label}]\n${value}` : '';
     })
     .filter(Boolean)
     .join('\n\n')

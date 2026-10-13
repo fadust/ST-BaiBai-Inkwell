@@ -238,7 +238,7 @@ export async function testChannel(channel: ApiChannel): Promise<{ ok: boolean; m
   try {
     const reply = await requestAtUrl(
       channel,
-      [{ role: 'user', content: '回复“ok”两个字符即可。' }],
+      [{ role: 'user', content: 'Reply with exactly the two characters: ok' }],
       primaryUrl,
     );
     if (channel.url.trim().replace(/\/+$/, '') !== primaryUrl) channel.url = primaryUrl;
@@ -251,7 +251,7 @@ export async function testChannel(channel: ApiChannel): Promise<{ ok: boolean; m
     try {
       const reply = await requestAtUrl(
         channel,
-        [{ role: 'user', content: '回复“ok”两个字符即可。' }],
+        [{ role: 'user', content: 'Reply with exactly the two characters: ok' }],
         fallbackUrl,
       );
       channel.url = fallbackUrl;

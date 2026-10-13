@@ -257,6 +257,8 @@ async function discoverBook(): Promise<{ folder: string; type: string } | null> 
     const list = (await response.json()) as ExtensionInfo[];
     if (!Array.isArray(list)) return null;
     const target = `third-party/${BOOK_FOLDER}`;
+    const disabled = ctx?.extensionSettings?.disabledExtensions;
+    if (Array.isArray(disabled) && disabled.includes(target)) return null;
     const match = list.find(extension => extension?.name === target);
     return match ? { folder: BOOK_FOLDER, type: match.type ?? 'local' } : null;
   } catch {

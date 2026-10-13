@@ -8,6 +8,7 @@ import { guardEditableArrowKeys } from '@/st/keyboard';
 import { versionedAssetUrl } from '@/version';
 import '@/styles/base.css';
 import '@/styles/theme.css';
+import '@/styles/english.css';
 import { createApp } from 'vue';
 
 const HOST_ID = 'bby-app-host';

@@ -19,6 +19,17 @@ afterEach(() => {
 });
 
 describe('floor access without rendered messages', () => {
+  it('uses the active character name when a message has no stored speaker name', () => {
+    installContext({
+      chat: [{ name: '', is_user: false, is_system: false, mes: 'An intact paragraph.' }],
+      name2: 'Alexandra Montgomery-Smythe',
+      getCurrentChatId: () => 'chat-a',
+    });
+    expect(openFloorInPen(0)).toBe(true);
+    expect(ui.speaker).toBe('Alexandra Montgomery-Smythe');
+    expect(ui.originalText).toBe('An intact paragraph.');
+  });
+
   it('opens a floor directly from the chat array', () => {
     installContext({
       chat: [

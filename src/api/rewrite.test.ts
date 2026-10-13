@@ -11,10 +11,10 @@ describe('formatAnnotations', () => {
       { paragraph: 8, text: '丙段', instructions: ['删掉环境描写'] },
     ]);
 
-    expect(text).toContain('第 3、5 段（共同要求）：');
-    expect(text).toContain('第 3 段原文：甲段');
-    expect(text).toContain('第 5 段原文：乙段');
-    expect(text).toContain('第 8 段：\n原文：丙段');
+    expect(text).toContain('Paragraphs 3, 5 (shared requirements):');
+    expect(text).toContain('Paragraph 3 original: 甲段');
+    expect(text).toContain('Paragraph 5 original: 乙段');
+    expect(text).toContain('Paragraph 8:\nOriginal: 丙段');
     // 共同要求只出现一次,不逐段重复
     expect(text.match(/对话改自然一些/g)).toHaveLength(1);
   });
@@ -24,7 +24,7 @@ describe('formatAnnotations', () => {
       { paragraph: 2, text: '原句', instructions: ['加强情绪', '保留比喻'] },
     ]);
 
-    expect(text).toBe('第 2 段：\n原文：原句\n要求：\n  - 加强情绪\n  - 保留比喻');
+    expect(text).toBe('Paragraph 2:\nOriginal: 原句\nRequirements:\n  - 加强情绪\n  - 保留比喻');
   });
 
   it('does not merge paragraphs whose instruction sets differ', () => {
@@ -33,9 +33,9 @@ describe('formatAnnotations', () => {
       { paragraph: 2, text: '乙', instructions: ['要求A', '要求B'] },
     ]);
 
-    expect(text).not.toContain('共同要求');
-    expect(text).toContain('第 1 段：');
-    expect(text).toContain('第 2 段：');
+    expect(text).not.toContain('shared requirements');
+    expect(text).toContain('Paragraph 1:');
+    expect(text).toContain('Paragraph 2:');
   });
 });
 
@@ -88,7 +88,7 @@ describe('parseChanges', () => {
 describe('default reasoning prompt', () => {
   it('requires a visible review and an answer-wrapped patch', () => {
     expect(CHAIN_OF_THOUGHT_PROMPT).toContain('<think>');
-    expect(CHAIN_OF_THOUGHT_PROMPT).toContain('容易被误改但应当保持原样');
+    expect(CHAIN_OF_THOUGHT_PROMPT).toContain('may look tempting to edit but must remain unchanged');
     expect(CHAIN_OF_THOUGHT_PROMPT).toContain('<answer>');
   });
 });

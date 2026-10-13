@@ -43,7 +43,7 @@ export function openFloorInPen(floor: number): boolean {
   openPen(
     chatMessage.mes ?? '',
     floor,
-    chatMessage.name || (chatMessage.is_user ? 'You' : 'AI'),
+    chatMessage.name || (chatMessage.is_user ? context.name1 : context.name2) || (chatMessage.is_user ? 'You' : 'AI'),
     context.getCurrentChatId?.() ?? '',
   );
   return true;

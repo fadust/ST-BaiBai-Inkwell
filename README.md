@@ -2,7 +2,7 @@
 
 > **Unofficial English port.** This is a community translation of
 > [ST-BaiBai-Inkwell (柏宝砚)](https://github.com/baibai-git/ST-BaiBai-Inkwell) by **baibai-git (柏柏)**. All credit for the extension goes to the original author.
-> Only user-facing text (UI, toasts, logs, docs) was translated; behavior is unchanged except the default system prompt (see below).
+> The interface, rewrite instructions, editorial review, context labels and default quick phrases are adapted for natural English. Paragraph patches and saved-data contracts remain compatible with the original.
 > The original Chinese README is kept as [README.zh-CN.md](README.zh-CN.md).
 >
 > The original repository has no license file. This port is published without the author's explicit permission, as a courtesy translation.
@@ -13,8 +13,13 @@
 
 > **Changes from the original.**
 > - The UI is in English.
-> - The built-in **System prompt** (top system message for rewrite requests) was replaced with a neutral, SFW editing context. You can set your own in *Settings → Custom prompts*.
-> - The other built-in prompts (rewrite instructions, chain-of-thought) and the 10 default quick phrases are left as the author wrote them, in Chinese.
+> - All built-in rewrite rules and the editorial review prompt are in English, including shared requests, recurring issues, necessary continuity repairs and whole-paragraph deletion.
+> - The **System prompt** supplies a fiction editing context consistent with those rules. You can customize it in *Settings → Custom prompts*.
+> - Explicit output rules request English prose while preserving names, quotes, macros, HTML and JSON keys.
+> - The 10 default quick phrases use English equivalents of the original editing ideas. Untouched historical defaults migrate automatically; custom edits, favorites and an intentionally empty list are preserved.
+> - Longer English labels, names and phrase instructions wrap on narrow screens.
+>
+> Version **0.4.3** repairs the incomplete English prompts in the earlier port. See [LOCALIZATION.md](LOCALIZATION.md) for source coverage and validation.
 
 > No need to rewrite a whole reply or copy-paste back and forth. BaiBai Inkwell is a message-polishing extension for SillyTavern. Select the paragraphs you want changed, write what should change, and the AI rewrites them with the surrounding story and character settings in mind. You then decide, paragraph by paragraph, what to keep.
 

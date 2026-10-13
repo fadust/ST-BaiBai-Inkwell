@@ -1,6 +1,7 @@
 import { getContext } from '@/st/context';
 import type { ThemeName } from '@/state/ui';
 import { reactive, watch } from 'vue';
+import { LEGACY_QUICK_PHRASES, LEGACY_REVIEW_PROMPT, LEGACY_SYSTEM_PROMPT } from '@/localization/legacyDefaults';
 
 export interface QuickPhrase {
   id: number;
@@ -47,62 +48,62 @@ const QUICK_PHRASE_DEFAULTS_VERSION = 1;
 export const DEFAULT_QUICK_PHRASES: readonly QuickPhrase[] = [
   {
     id: 1,
-    name: '吃点别的',
-    instruction: '吃点别的东西，不要老吃这个',
+    name: 'Vary the food',
+    instruction: 'Choose a different food; stop having the characters eat the same thing repeatedly.',
     favorite: false,
   },
   {
     id: 2,
-    name: '禁慢点吃',
-    instruction: '不要出现“慢点吃，没人跟你抢”之类的句式',
+    name: 'No food reassurance cliché',
+    instruction: 'Avoid lines such as “Slow down, nobody is going to steal your food,” including close variations.',
     favorite: false,
   },
   {
     id: 3,
-    name: '别老吃饭',
-    instruction: '角色没有这么爱吃饭，不要老是提起吃饭',
+    name: 'Fewer meal scenes',
+    instruction: 'The characters are not obsessed with eating. Stop bringing up meals so often.',
     favorite: false,
   },
   {
     id: 4,
-    name: '禁老子',
-    instruction: '不要使用老子自称',
+    name: 'No swaggering self-reference',
+    instruction: 'Use a natural first-person voice instead of swaggering self-titles such as “your old man” or “this badass”.',
     favorite: false,
   },
   {
     id: 5,
-    name: '禁投石',
-    instruction: '不要出现石子投入湖面这样的描写，包括其变体也不要',
+    name: 'No pebble-in-a-pond metaphor',
+    instruction: 'Avoid describing an effect as a stone dropped into a lake or pond, including ripple metaphors and close variations.',
     favorite: false,
   },
   {
     id: 6,
-    name: '禁不是而是',
-    instruction: '不要使用“不是而是”的句式',
+    name: 'No “not X, but Y” framing',
+    instruction: 'Avoid the “not X, but Y” sentence pattern and equivalent contrastive phrasing.',
     favorite: false,
   },
   {
     id: 7,
-    name: '禁发白衬衫和军靴',
-    instruction: '不要写衣服写得发白，换一个，也不要穿军靴',
+    name: 'Vary the clothing',
+    instruction: 'Choose something other than clothes described as faded or washed pale, and do not dress the characters in military boots.',
     favorite: false,
   },
   {
     id: 8,
-    name: '禁不容置疑等',
-    instruction: '不要出现不容置疑，掌控欲，占有欲，野兽，低吼，猎物猎手等词',
+    name: 'No dominance clichés',
+    instruction: 'Avoid “unquestionable” or “brooked no argument,” controlling or possessive language, beast imagery, low growls, and predator/prey or hunter/quarry comparisons.',
     favorite: false,
   },
   {
     id: 9,
-    name: '别做完就睡',
-    instruction: '不要性爱之后马上睡觉，除了睡觉还有很多事情可以做',
+    name: 'Vary the aftermath of intimacy',
+    instruction: 'Do not have the characters fall asleep immediately after sex. Let them do something else that fits the scene.',
     favorite: false,
   },
   {
     id: 10,
-    name: '禁绝望',
-    instruction: '不要动不动就崩溃绝望，角色的心理没有这么脆弱',
+    name: 'Keep emotional resilience',
+    instruction: 'Do not make the characters collapse into despair at every setback; their emotional resilience is stronger than that.',
     favorite: false,
   },
 ];
@@ -176,6 +177,21 @@ function normalizeQuickPhrases(raw: unknown): QuickPhrase[] {
     .filter(item => item.name.trim() && item.instruction.trim());
 }
 
+function localizeQuickPhrases(phrases: QuickPhrase[]): QuickPhrase[] {
+  return phrases.map(phrase => {
+    const legacy = LEGACY_QUICK_PHRASES.find(item => item.id === phrase.id);
+    const english = DEFAULT_QUICK_PHRASES.find(item => item.id === phrase.id);
+    return legacy && english && phrase.name === legacy.name && phrase.instruction === legacy.instruction
+      ? { ...english, favorite: phrase.favorite }
+      : phrase;
+  });
+}
+
+function normalizePrompt(value: unknown, legacy: string): string {
+  if (typeof value !== 'string') return '';
+  return value.trim() === legacy.trim() ? '' : value;
+}
+
 function defaults(): PenSettings {
   return {
     defaultChannelId: '',
@@ -209,13 +225,13 @@ export function normalizePenSettings(raw: unknown): PenSettings {
     showUserFloors: value.showUserFloors === true,
     quickPhraseDefaultsVersion: QUICK_PHRASE_DEFAULTS_VERSION,
     phrases:
-      value.quickPhraseDefaultsVersion === QUICK_PHRASE_DEFAULTS_VERSION
-        ? normalizeQuickPhrases(value.phrases)
+      value.quickPhraseDefaultsVersion === QUICK_PHRASE_DEFAULTS_VERSION ||
+      (Array.isArray(value.phrases) && value.phrases.length > 0)
+        ? localizeQuickPhrases(normalizeQuickPhrases(value.phrases))
         : cloneDefaultQuickPhrases(),
     prompts: {
-      jailbreak: typeof value.prompts?.jailbreak === 'string' ? value.prompts.jailbreak : '',
-      chainOfThought:
-        typeof value.prompts?.chainOfThought === 'string' ? value.prompts.chainOfThought : '',
+      jailbreak: normalizePrompt(value.prompts?.jailbreak, LEGACY_SYSTEM_PROMPT),
+      chainOfThought: normalizePrompt(value.prompts?.chainOfThought, LEGACY_REVIEW_PROMPT),
     },
     // 旧版本曾内置两条界面占位规则；加载时清理，之后规则库只保留用户规则。
     replaceRules: Array.isArray(value.replaceRules)

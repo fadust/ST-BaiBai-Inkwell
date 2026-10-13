@@ -72,7 +72,7 @@ describe('story history serialization', () => {
     expect(indices).toEqual([1, 2]);
 
     expect(serializeRewriteHistory(chat, indices, 'User', 'Char')).toEqual({
-      historyReference: '[楼层 #1｜Char｜ST 隐藏]\n上一条 AI 正文',
+      historyReference: '[Message #1 | Char | ST-hidden]\n上一条 AI 正文',
       latestUserMessage: '剧情推进',
       messageCount: 2,
     });
@@ -90,9 +90,9 @@ describe('story history serialization', () => {
     const indices = selectHistoryIndices(chat, 4, 2);
     const history = serializeRewriteHistory(chat, indices, 'User', 'Char');
 
-    expect(history.historyReference).toContain('[楼层 #0｜Char]\nAI 一');
-    expect(history.historyReference).toContain('[楼层 #1｜User]\n用户一');
-    expect(history.historyReference).toContain('[楼层 #2｜Char]\nAI 二');
+    expect(history.historyReference).toContain('[Message #0 | Char]\nAI 一');
+    expect(history.historyReference).toContain('[Message #1 | User]\n用户一');
+    expect(history.historyReference).toContain('[Message #2 | Char]\nAI 二');
     expect(history.latestUserMessage).toBe('用户二');
     expect(history.messageCount).toBe(4);
   });

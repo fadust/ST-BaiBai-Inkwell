@@ -5,10 +5,8 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
-const relativeSillyTavernPath = path.relative(
-  path.join(rootDir, 'dist'),
-  rootDir.substring(0, rootDir.lastIndexOf('public') + 'public'.length),
-);
+// Runtime assets are served from /scripts/extensions/third-party/<folder>/dist/.
+const relativeSillyTavernPath = '../../../../../';
 
 const globals: Record<string, string> = {
   jquery: '$',

@@ -123,7 +123,7 @@ function closePicker(): void {
         <p v-if="!filteredPhrases.length" class="bby-field-hint">No matching phrases.</p>
       </div>
       <footer class="bby-modal-foot">
-        <span class="bby-phrase-pick-count">Selected {{ modelValue.length }} items</span>
+        <span class="bby-phrase-pick-count">Selected {{ modelValue.length }} {{ modelValue.length === 1 ? 'item' : 'items' }}</span>
         <span class="bby-modal-foot-spacer"></span>
         <button class="bby-button bby-primary" type="button" @click="closePicker">Done</button>
       </footer>

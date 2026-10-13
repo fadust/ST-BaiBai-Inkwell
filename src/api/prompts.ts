@@ -1,63 +1,58 @@
-/** 内置提示词与自定义提示词的回落解析。 */
-
-/**
- * Built-in top system prompt for rewrite requests.
- * English port: upstream's default was replaced with a neutral, SFW editing context.
- */
+/** Built-in editing prompts; blank custom fields fall back to these defaults. */
 export const JAILBREAK_PROMPT = `<editing_context>
-This is a collaborative fiction editing task. The text is part of an ongoing story written with the user; its characters, events and views are fictional.
+You are editing collaborative fiction. Its characters, events and viewpoints belong to the story. Approach its themes and conflicts as an editor, without adding commentary or changing the author's intended meaning.
 
-1. Revise only the passages the user marked, as the user asked. Keep the author's voice, tone, point of view, tense and established story facts.
-2. Treat the story's themes and conflicts as part of the fiction and edit them for craft. Do not add commentary, disclaimers or notes to the story text.
-3. Do not change anything the user did not ask to change.
-4. If you cannot write a requested change, leave that paragraph unchanged instead of substituting different content.
+Follow the user's editing requests with the smallest necessary changes. Preserve the established voice, tone, viewpoint, tense, story facts and character relationships unless the user explicitly asks to change them.
+Marked paragraphs are the primary targets. Also fix the same clearly identified problem elsewhere in the current message, or make a necessary continuity repair, as the paragraph rules specify. Do not expand the task into a general rewrite.
+Do not replace a requested edit with unrelated content. If a paragraph cannot be revised as requested, leave it unchanged.
 </editing_context>`;
 
-/** 内置思维链提示词:先输出结构化审稿记录,再输出最终补丁。 */
+export const ENGLISH_OUTPUT_RULE = `Write the editorial review and all new or revised prose in natural English. Keep established proper names, spelling, capitalization, accents, apostrophes, titles and forms of address as supplied; do not invent English names or transliterations. Preserve quoted source text unless the user's request requires changing it. Keep JSON keys, paragraph IDs, macros, HTML attributes and special markers exactly as specified. Do not translate untouched paragraphs or read-only references.`;
+
+/** Brief editorial findings are separated from the machine-readable patch. */
 export const CHAIN_OF_THOUGHT_PROMPT = `<rewrite_reasoning_protocol>
-在生成段落替换补丁前，你必须先完成一次可见的审稿判断，并严格按照以下结构输出：
+Before returning paragraph patches, provide a concise editorial review in this structure. Report editing decisions and their reasons, rather than a private step-by-step thought process.
 
 <think>
-用户不满意原文的原因：
-- 结合整体要求和段落标注，说明问题属于措辞、人物行为、文风、逻辑、节奏、重复表达，还是与角色或世界设定不符。
+Editing issues:
+- Identify whether the overall requests and annotations concern wording, character behavior, style, logic, pacing, repetition, or a conflict with character or world settings.
 
-段落判断：
-- 逐段判断当前楼层是否直接违反用户要求。
-- 明确列出需要修改的 P 编号及其具体理由。
-- 明确列出容易被误改但应当保持原样的 P 编号。
-- 有段落标注时，以标注段落为主要目标。
-- 标注为“共同要求”的多个段落属于同一个问题：按同一条要求逐段判断、逐段给出独立修改，不得只改其中一段，也不得把多段合并处理。
-- 逐条判断段落标注属于“仅限本段的具体修改”还是“需要检查全文的同类问题”。
-- 针对本段具体句子、动作或剧情内容的要求，只修改标注段落。
-- 针对重复表达、模板化句式、同一设定错误、同类措辞或相同内容反复出现的要求，必须检查当前楼层的全部段落。
-- 未标注段落确实存在同一个明确问题时，将其列为关联调整，并说明它与哪条标注要求直接相关。
-- 只有整体要求而没有段落标注时，自行定位真正存在问题的段落，不能把任务扩大成全文润色。
-- 如果修改标注段落会造成明确的指代断裂、动作矛盾、时间地点冲突或上下文不连贯，可以连带修改维持连续性所必需的未标注段落。
-- “可以写得更好”、泛泛润色、统一全文文风、顺便改写或增加细节，都不属于同类问题，不得据此扩大修改范围。
+Paragraph selection:
+- Check each paragraph of the current message against the user's requests.
+- List the P numbers that need changes and a specific reason for each.
+- List paragraphs that may look tempting to edit but must remain unchanged.
+- Treat marked paragraphs as the primary targets.
+- A group marked "shared requirements" has the same issue in every listed paragraph: assess and revise each separately. Do not fix just one member or merge the group.
+- Classify each annotation as a local edit or a recurring problem that requires checking the entire current message.
+- A request about a particular sentence, action or story event applies only to its marked paragraph.
+- For a clearly specified recurring expression, formulaic sentence pattern, setting error, wording issue or repeated content, check every paragraph in the current message.
+- Include an unmarked paragraph only if it has that same specific issue, and identify the annotation it relates to.
+- If there are only overall requests, locate the paragraphs that actually have the issue; do not turn this into polishing the whole message.
+- If an edit would break a reference, contradict an action, conflict with time or place, or disrupt continuity, include only the unmarked paragraphs needed to repair that break.
+- A paragraph being improvable, general polishing, making the style uniform, incidental rewriting or adding detail does not justify expanding the scope.
 
-设定与上下文约束：
-- 结合角色设定、主角设定、世界设定和历史上下文，判断人物此刻合理的语言、行动和反应。
-- 设定只用于约束改写，不得据此擅自增加新剧情、新关系、新能力或新世界观事实。
+Character and context checks:
+- Use the character card, user persona, world settings and earlier story to check what each character would plausibly say, do and feel now.
+- Settings constrain the edit; they do not authorize new events, relationships, abilities or facts about the world.
 
-改写方案：
-- 说明每个目标段落应该改成什么方向，以及怎样以最小改动解决问题。
-- 保留没有问题的句子、剧情事实、叙述视角、时态、情绪进程和人物关系。
-- 不得用另一种套话、陈词滥调或过度描写替换原问题。
+Revision plan:
+- State the direction of each target edit and the smallest change that resolves its issue.
+- Preserve sound sentences, plot facts, viewpoint, tense, emotional progression and relationships.
+- Do not replace one stock phrase, cliché or overwrought description with another.
 
-最终复核：
-- 每个准备返回的段落都必须有明确、可验证的修改理由。
-- 删除所有与整体要求、段落标注、同类问题扫描结果或必要连续性修复无关的候选修改。
+Final check:
+- Every returned paragraph needs a specific, verifiable editing reason.
+- Remove proposed edits unrelated to an overall request, an annotation, the same recurring issue, or a necessary continuity repair.
 </think>
 
-完成审稿后，紧接着输出：
+Immediately follow the review with:
 <answer>
-{"changes":[{"paragraph":2,"replacement":"替换后的完整段落"}]}
+{"changes":[{"paragraph":2,"replacement":"The complete revised paragraph."}]}
 </answer>
 
-<think> 中必须写出实际判断，不能省略、不能只写“已分析”。不要在 <answer> 中输出解释、Markdown 代码块或 JSON 之外的内容。
+The <think> block must contain actual editorial findings, not just "analysis complete". The <answer> block must contain only the JSON object: no explanation, Markdown fences or other text.
 </rewrite_reasoning_protocol>`;
 
-/** 自定义(去空白后)非空则用自定义,否则回落内置默认。 */
 export function resolvePrompt(custom: string, builtin: string): string {
   return custom.trim() || builtin;
 }

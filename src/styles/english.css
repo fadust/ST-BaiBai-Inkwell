@@ -1,0 +1,37 @@
+/* English phrases and names need room to wrap at narrow widths. */
+.bby-root .bby-carry-row span,
+.bby-root .bby-phrase-list small,
+.bby-root .bby-phrase-pick-body small,
+.bby-root .bby-floor-meta strong {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.bby-root .bby-para-text,
+.bby-root .bby-phrase-pick-body,
+.bby-root .bby-field-label,
+.bby-root .bby-mini-field {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.bby-root .bby-work-tabs,
+.bby-root .bby-strip-meta,
+.bby-root .bby-doc-status,
+.bby-root .bby-field-head {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .bby-root .bby-action-bar {
+    flex-wrap: wrap;
+  }
+
+  .bby-root .bby-channel-menu {
+    flex-basis: 100%;
+  }
+
+  .bby-root .bby-channel-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
