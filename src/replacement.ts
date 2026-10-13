@@ -24,7 +24,7 @@ function parseRegex(pattern: string): RegExp {
       if (!/^[a-zA-Z]*$/.test(flags)) continue;
 
       const source = pattern.slice(1, index);
-      if (!source) throw new Error('正则表达式内容不能为空');
+      if (!source) throw new Error('Regex content cannot be empty');
       return new RegExp(source, flags.includes('g') ? flags : `${flags}g`);
     }
   }
@@ -34,7 +34,7 @@ function parseRegex(pattern: string): RegExp {
 
 export function replaceText(text: string, rule: TextReplacement): ReplacementResult {
   if (!rule.pattern) {
-    throw new Error('查找内容不能为空');
+    throw new Error('Search text cannot be empty');
   }
 
   if (rule.isRegex) {
@@ -68,7 +68,7 @@ export function replaceTextWithRules(
       count += next.count;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`规则“${rule.name}”无法执行：${message}`);
+      throw new Error(`Rule "${rule.name}" cannot run: ${message}`);
     }
   }
 

@@ -95,6 +95,6 @@ describe('text replacement', () => {
       replaceTextWithRules('正文', [
         { name: '坏规则', pattern: '[', replacement: '', isRegex: true },
       ]),
-    ).toThrow('规则“坏规则”无法执行');
+    ).toThrow('Rule "坏规则" cannot run');
   });
 });

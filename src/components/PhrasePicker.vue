@@ -74,22 +74,22 @@ function closePicker(): void {
       :key="phrase.id"
       type="button"
       class="bby-chip-picked"
-      :title="`${phrase.instruction}（点击移除）`"
+      :title="`${phrase.instruction} (click to remove)`"
       @click="remove(phrase.id)"
     >
       <span>{{ phrase.name }}</span>
       <Icon name="close" class="bby-chip-x" />
     </button>
     <button type="button" class="bby-chip-add" @click="openPicker">
-      <Icon name="plus" /> 添加要求
+      <Icon name="plus" /> Add request
     </button>
   </div>
 
   <ModalMask :open="pickerOpen" @close="closePicker">
-    <div class="bby-modal bby-phrase-sheet" role="dialog" aria-modal="true" aria-label="选择快捷语句">
+    <div class="bby-modal bby-phrase-sheet" role="dialog" aria-modal="true" aria-label="Choose a quick phrase">
       <header class="bby-modal-head">
-        <span class="bby-modal-title">选择快捷语句</span>
-        <button class="bby-icon-mini" type="button" title="关闭" @click="closePicker">
+        <span class="bby-modal-title">Choose a quick phrase</span>
+        <button class="bby-icon-mini" type="button" title="Close" @click="closePicker">
           <Icon name="close" />
         </button>
       </header>
@@ -100,7 +100,7 @@ function closePicker(): void {
           v-model="query"
           class="bby-input"
           type="text"
-          placeholder="搜索名称或指令"
+          placeholder="Search name or instruction"
           @keydown.esc.stop="closePicker"
         />
       </div>
@@ -120,12 +120,12 @@ function closePicker(): void {
           </span>
           <Icon name="check" class="bby-phrase-pick-check" />
         </button>
-        <p v-if="!filteredPhrases.length" class="bby-field-hint">没有匹配的短语。</p>
+        <p v-if="!filteredPhrases.length" class="bby-field-hint">No matching phrases.</p>
       </div>
       <footer class="bby-modal-foot">
-        <span class="bby-phrase-pick-count">已选 {{ modelValue.length }} 条</span>
+        <span class="bby-phrase-pick-count">Selected {{ modelValue.length }} items</span>
         <span class="bby-modal-foot-spacer"></span>
-        <button class="bby-button bby-primary" type="button" @click="closePicker">完成</button>
+        <button class="bby-button bby-primary" type="button" @click="closePicker">Done</button>
       </footer>
     </div>
   </ModalMask>

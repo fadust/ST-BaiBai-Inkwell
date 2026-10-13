@@ -54,7 +54,7 @@ describe('toggleFloorHidden', () => {
 
   it('throws when the floor does not exist', async () => {
     installContext({ chat: [] });
-    await expect(toggleFloorHidden(3)).rejects.toThrow('楼层不存在');
+    await expect(toggleFloorHidden(3)).rejects.toThrow('Message does not exist');
   });
 });
 

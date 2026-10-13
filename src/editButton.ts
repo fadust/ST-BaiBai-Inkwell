@@ -26,7 +26,7 @@ function createAction(kind: 'top' | 'bottom'): HTMLDivElement {
   button.className = `menu_button ${ACTION_CLASS}`;
   button.innerHTML = penIconSvg(15);
   button.dataset.bbyPlacement = kind;
-  button.title = 'AI 标注改写';
+  button.title = 'AI annotated rewrite';
   button.setAttribute('role', 'button');
   button.setAttribute('tabindex', '0');
 
@@ -37,7 +37,7 @@ function createAction(kind: 'top' | 'bottom'): HTMLDivElement {
     const context = getContext();
     const chatMessage = context?.chat?.[floor];
     if (!editor || !Number.isInteger(floor) || !chatMessage) {
-      toastr?.warning?.('请先编辑一条消息', '柏宝砚');
+      toastr?.warning?.('Edit a message first', 'BaiBai Inkwell');
       return;
     }
     openPen(

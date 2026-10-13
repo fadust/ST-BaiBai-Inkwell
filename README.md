@@ -1,100 +1,126 @@
-# 柏宝砚 · SillyTavern 楼层改写工具
+# BaiBai Inkwell (English) · Message rewrite tool for SillyTavern
 
-> 不必整段重写，也不用反复复制粘贴。柏宝砚是一款为 SillyTavern 打造的楼层精修扩展：选中需要调整的段落，写下修改要求，让 AI 在理解前后剧情与角色设定的基础上给出改写结果，再由你逐段决定是否采用。
+> **Unofficial English port.** This is a community translation of
+> [ST-BaiBai-Inkwell (柏宝砚)](https://github.com/baibai-git/ST-BaiBai-Inkwell) by **baibai-git (柏柏)**. All credit for the extension goes to the original author.
+> Only user-facing text (UI, toasts, logs, docs) was translated; behavior is unchanged except the default system prompt (see below).
+> The original Chinese README is kept as [README.zh-CN.md](README.zh-CN.md).
+>
+> The original repository has no license file. This port is published without the author's explicit permission, as a courtesy translation.
+>
+> **If you are the original author and want this port taken down or changed, open an issue here and it will be removed promptly.**
+>
+> Report translation problems here. Report bugs in the extension itself upstream.
 
-聊天里的回复并不总能一次写到满意。也许只是某句话不符合人设、某段情绪不够自然、一个动作写得太重复，或者整体文风需要稍微调整。直接重新生成整条回复容易丢掉原本满意的内容，手动修改又费时间。柏宝砚专门处理这种「大部分都很好，只想精修其中几处」的情况。
+> **Changes from the original.**
+> - The UI is in English.
+> - The built-in **System prompt** (top system message for rewrite requests) was replaced with a neutral, SFW editing context. You can set your own in *Settings → Custom prompts*.
+> - The other built-in prompts (rewrite instructions, chain-of-thought) and the 10 default quick phrases are left as the author wrote them, in Chinese.
 
----
+> No need to rewrite a whole reply or copy-paste back and forth. BaiBai Inkwell is a message-polishing extension for SillyTavern. Select the paragraphs you want changed, write what should change, and the AI rewrites them with the surrounding story and character settings in mind. You then decide, paragraph by paragraph, what to keep.
 
-## 它能做什么
-
-### 精确到段落的 AI 改写
-
-- **哪里不满意就改哪里**：把需要调整的段落标记出来，分别填写修改要求，其余内容尽量保持原样。
-- **整体要求与局部要求并用**：既可以为整个楼层指定统一方向，也可以给不同段落安排不同的修改任务。
-- **关联段落自动协调**：当局部修改会影响后文时，AI 可以同步调整必要的关联段落，避免前后脱节。
-- **支持整段删除**：不需要的段落可以作为改写结果直接删除，不必再手动清理。
-
-### 逐段审核，不满意就不采用
-
-生成完成后，柏宝砚会把原文与改写结果并排展示。每一处修改都可以单独选择：
-
-- 接受这一段的改写。
-- 保留这一段的原文。
-- 全部放弃，不改动原楼层。
-
-只有最终确认采用的段落才会写回聊天，不会因为一次生成而覆盖整条原文。
-
-### 带着剧情和设定一起理解
-
-改写不只是润色一句话。柏宝砚可以在生成时参考：
-
-- 目标楼层之前的若干轮聊天。
-- 当前角色的角色卡设定。
-- 用户角色的人设信息。
-- 与当前剧情相关的世界书内容。
-
-这些内容只用于帮助 AI 理解人物、语境和剧情连续性，让改写结果尽量不崩人设、不跳剧情。
-
-### 快捷语句，让常用要求一点即用
-
-经常使用的修改要求可以保存为快捷语句，例如：
-
-- 增强情绪和动作细节。
-- 减少重复句式。
-- 保持角色原有语气。
-- 删除某类不喜欢的表达。
-- 调整节奏，让对话更自然。
-
-快捷语句可以用于单独段落，也可以作为整个楼层的统一要求。常用项目还能置顶，减少重复输入。
-
-### 查找替换与规则库
-
-不需要 AI 判断的修改，可以直接通过查找替换完成：
-
-- 普通文字替换。
-- 正则表达式匹配。
-- 批量删除指定内容。
-- 把常用替换保存为规则。
-- 组合多条已启用规则，一次清理整个楼层。
-
-适合统一角色名、清理固定格式、删除状态栏、修正常见错字或处理重复出现的表达。
-
-### 自由选择生成渠道
-
-- 不额外配置时，可以直接跟随 SillyTavern 当前使用的主 API。
-- 也可以添加独立副 API，为改写任务指定单独的地址、模型和参数。
-- 安装柏宝书后，两个插件可以共用同一份副 API 渠道，减少重复配置。
-
-### 生成时也不用停下
-
-AI 生成过程中可以随时关闭柏宝砚，也可以继续查看和编辑同一聊天里的其他楼层。生成完成后，柏宝砚会自动回到原本正在改写的楼层，并恢复对应的标注和审核结果。
-
-如果只是暂时退出聊天回到首页，结果会继续保留；重新进入原聊天后仍可继续审核。
-
-### 楼层浏览与管理
-
-- 集中浏览当前聊天中的楼层，默认只显示 AI 回复，也可以显示用户消息。
-- 按楼层号、角色名或正文关键词快速搜索。
-- 查看哪些楼层已被隐藏。
-- 直接隐藏或重新显示指定楼层。
-- 从指定位置删除该楼层及之后的内容。
-
-### 适配不同设备和主题
-
-柏宝砚提供多套界面主题，也可以跟随 SillyTavern 的当前配色。电脑、平板和手机均可使用，在移动端也能方便地浏览楼层、添加标注和审核结果。
+Chat replies are not always right on the first try. Maybe one line is out of character, one paragraph's emotion feels off, an action repeats, or the style needs a small adjustment. Regenerating the whole reply loses the parts you liked; editing by hand takes time. Inkwell is built for the case where most of the reply is good and only a few spots need work.
 
 ---
 
-## 适合这些时候
+## What it does
 
-- 一整条回复只有一两段不满意，不想全部重新生成。
-- 剧情方向正确，但语言、节奏或情绪需要精修。
-- 某段出现重复表达、错误称呼或不符合人设的行为。
-- 希望 AI 参考世界书和角色设定后再修改正文。
-- 想保留原文控制权，对 AI 的每一处改动逐段确认。
-- 有一批固定句式或格式内容需要经常清理。
+### AI rewrites down to the paragraph
+
+- **Change only what you dislike.** Mark the paragraphs to adjust and give each its own request. Everything else stays as close to the original as possible.
+- **Overall and local requests together.** Give the whole message one direction, and give different paragraphs different tasks.
+- **Related paragraphs stay consistent.** When a local change affects later text, the AI can adjust the necessary related paragraphs so the message does not break.
+- **Whole-paragraph deletion.** Unwanted paragraphs can be deleted as part of the result, with no manual clean-up.
+
+### Review paragraph by paragraph
+
+After generation, Inkwell shows the original and the rewrite side by side. For each change you can:
+
+- Accept the rewrite for that paragraph.
+- Keep the original for that paragraph.
+- Discard everything and leave the message untouched.
+
+Only the paragraphs you confirm are written back to the chat. A single generation never overwrites the whole message.
+
+### Story- and setting-aware
+
+Rewriting is more than polishing one sentence. Inkwell can include:
+
+- A number of chat rounds before the target message.
+- The current character card.
+- The user persona.
+- World Info entries relevant to the current scene.
+
+These only help the AI understand the characters, context and continuity, so rewrites stay in character and on plot.
+
+### Quick phrases for common requests
+
+Save requests you use often as quick phrases, for example:
+
+- Add more emotion and physical detail.
+- Reduce repeated sentence patterns.
+- Keep the character's original voice.
+- Remove a kind of expression you dislike.
+- Adjust pacing so dialogue feels more natural.
+
+Quick phrases work on a single paragraph or as the overall request for the message. Pin frequent ones to the top.
+
+### Find and replace, and a rule library
+
+Changes that need no AI judgment can be done with find and replace:
+
+- Plain text replacement.
+- Regular-expression matching.
+- Bulk deletion of specific content.
+- Save common replacements as rules.
+- Combine several enabled rules to clean a whole message at once.
+
+Useful for unifying character names, cleaning fixed formats, removing status bars, fixing common typos or handling recurring phrases.
+
+### Choose the generation channel
+
+- With no extra setup, it follows SillyTavern's current main API.
+- Or add a separate secondary API with its own URL, model and parameters for rewrite tasks.
+- With BaiBai-Book installed, both extensions can share the same secondary API channels.
+
+### Keep working while it generates
+
+You can close Inkwell during generation, or view and edit other messages in the same chat. When it finishes, Inkwell returns to the message being rewritten and restores its annotations and review results.
+
+If you only leave the chat for the home screen, the results are kept. Re-enter the chat to continue reviewing.
+
+### Browse and manage messages
+
+- Browse the messages of the current chat. Only AI replies are shown by default; user messages can be shown too.
+- Search by message number, character name or keyword.
+- See which messages are hidden.
+- Hide or unhide a message directly.
+- Delete a message and everything after it.
+
+### Devices and themes
+
+Several UI themes are included, or follow SillyTavern's current colors. Works on desktop, tablet and phone; on mobile you can browse messages, add annotations and review results comfortably.
 
 ---
 
-作者：柏柏 · 欢迎反馈与建议。
+## Good for
+
+- Only one or two paragraphs of a reply need fixing, and you do not want to regenerate all of it.
+- The plot direction is right, but the language, pacing or emotion needs polish.
+- A paragraph repeats itself, uses the wrong form of address or acts out of character.
+- You want the AI to check World Info and character settings before editing.
+- You want full control and to confirm every AI change paragraph by paragraph.
+- You regularly clean up the same phrases or formatting.
+
+---
+
+## Installation
+
+SillyTavern → Extensions → Install extension, and enter:
+
+```
+https://github.com/fadust/ST-BaiBai-Inkwell
+```
+
+Do not install this alongside the original Chinese version. The in-app update check points to this English repository.
+
+Original author: 柏柏 (baibai-git). Feedback on the extension itself goes upstream; feedback on the translation goes here.

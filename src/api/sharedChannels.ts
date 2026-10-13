@@ -99,7 +99,7 @@ function normalizeChannel(raw: unknown): ApiChannel {
     : undefined;
   return {
     id: typeof channel.id === 'string' ? channel.id : `ch_${Date.now()}_${++channelSequence}`,
-    name: typeof channel.name === 'string' ? channel.name : '新渠道',
+    name: typeof channel.name === 'string' ? channel.name : 'New channel',
     url: typeof channel.url === 'string' ? channel.url : '',
     key: typeof channel.key === 'string' ? channel.key : '',
     model: typeof channel.model === 'string' ? channel.model : '',
@@ -290,7 +290,7 @@ export async function performBookUpdate(): Promise<void> {
   sharingState.updateError = '';
   try {
     const installed = await discoverBook();
-    if (!installed) throw new Error('未找到柏宝书扩展目录');
+    if (!installed) throw new Error('BaiBai-Book extension folder not found');
     const ctx = getContext();
     const response = await fetch('/api/extensions/update', {
       method: 'POST',
@@ -352,7 +352,7 @@ export function canEditChannels(): boolean {
 export function newChannel(): ApiChannel {
   return {
     id: `ch_${Date.now()}_${++channelSequence}`,
-    name: '新渠道',
+    name: 'New channel',
     url: '',
     key: '',
     model: '',

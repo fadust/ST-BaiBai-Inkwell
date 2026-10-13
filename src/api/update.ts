@@ -8,7 +8,7 @@ import { reactive } from 'vue';
  * 检测失败一律静默(不误报、不误清),只有用户点了「更新」且更新 API 报错才抛给 UI 提示。
  */
 const REMOTE_MANIFEST_URL =
-  'https://raw.githubusercontent.com/baibai-git/ST-BaiBai-Inkwell/main/manifest.json';
+  'https://raw.githubusercontent.com/fadust/ST-BaiBai-Inkwell/main/manifest.json';
 const FALLBACK_FOLDER = 'ST-BaiBai-Pen';
 
 export const updateState = reactive({

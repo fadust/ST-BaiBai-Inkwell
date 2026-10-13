@@ -64,7 +64,7 @@ export function buildShotFilename(floor: number, speaker: string, now = new Date
   const stamp =
     `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}` +
     `-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-  return `${sanitizeFilename(speaker)}-楼层${floor}-${stamp}.jpg`;
+  return `${sanitizeFilename(speaker)}-message${floor}-${stamp}.jpg`;
 }
 
 /** 沿 .mes → #chat → body 找第一个不透明背景色,截图垫底避免透明 PNG */
@@ -326,18 +326,18 @@ export async function captureFloorShot(
 ): Promise<{ blob: Blob; outcome: FloorShotOutcome }> {
   const context = getContext();
   const message = context?.chat?.[floor];
-  if (!context || !message) throw new Error('楼层不存在');
+  if (!context || !message) throw new Error('Message does not exist');
   const snapdom = await loadSnapdom();
 
   const liveMes = queryLiveMes(floor);
   const clone = liveMes
     ? (liveMes.cloneNode(true) as HTMLElement)
     : buildMesFromTemplate(context, message, floor);
-  if (!clone) throw new Error('无法构建楼层截图节点');
+  if (!clone) throw new Error('Cannot build the message screenshot node');
   stripInteractive(clone);
 
   const mesText = clone.querySelector<HTMLElement>('.mes_text');
-  if (!mesText) throw new Error('楼层结构异常:找不到正文节点');
+  if (!mesText) throw new Error('Unexpected message structure: text node not found');
 
   // 深度 0 重渲染;拿不到管线时保留克隆现状(所见即所得),但去掉酒馆助手的包装层
   const rendered = renderAtDepthZero(context, floor);

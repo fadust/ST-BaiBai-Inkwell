@@ -26,9 +26,9 @@ export function injectMenuButton(): void {
 
     const item = $(`
       <div class="extension_container interactable" tabindex="0">
-        <a id="${MENU_ITEM_ID}" class="list-group-item" href="#" title="柏宝砚">
+        <a id="${MENU_ITEM_ID}" class="list-group-item" href="#" title="BaiBai Inkwell">
           ${penIconSvg(18, 2)}
-          <span>柏宝砚</span>
+          <span>BaiBai Inkwell</span>
         </a>
       </div>
     `);

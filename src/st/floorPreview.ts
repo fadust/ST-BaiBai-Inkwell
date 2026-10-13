@@ -11,6 +11,6 @@ export function buildFloorPreview(rawText: string): string {
       .replace(UNCLOSED_THINKING_BLOCK_PATTERN, ' ')
       .replace(/<[^>]+>/g, ' ')
       .replace(/\s+/g, ' ')
-      .trim() || '（无正文预览）'
+      .trim() || '(no text preview)'
   );
 }

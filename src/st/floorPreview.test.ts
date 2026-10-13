@@ -24,6 +24,6 @@ describe('floor preview cleanup', () => {
   });
 
   it('returns a useful placeholder when no visible text remains', () => {
-    expect(buildFloorPreview('<think>只有推理</think>')).toBe('（无正文预览）');
+    expect(buildFloorPreview('<think>只有推理</think>')).toBe('(no text preview)');
   });
 });

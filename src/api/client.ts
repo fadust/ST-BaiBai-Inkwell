@@ -48,7 +48,7 @@ async function withTimeout<T>(
   try {
     return await task(controller.signal);
   } catch (error) {
-    if (timedOut) throw new ApiError(`副 API 请求超时(>${timeoutSec}秒)`);
+    if (timedOut) throw new ApiError(`Secondary API request timed out (>${timeoutSec} s)`);
     throw error;
   } finally {
     window.clearTimeout(timer);
@@ -84,7 +84,7 @@ async function readSseContent(response: Response): Promise<string> {
       if (!payload || payload === '[DONE]') continue;
       try {
         const data = JSON.parse(payload);
-        if (data?.error) throw new ApiError(data.error.message || '副 API 返回错误');
+        if (data?.error) throw new ApiError(data.error.message || 'Secondary API returned an error');
         const delta =
           data?.choices?.[0]?.delta?.content ??
           data?.choices?.[0]?.message?.content ??
@@ -171,9 +171,9 @@ async function requestAtUrl(
   signal?: AbortSignal,
 ): Promise<string> {
   const context = getContext();
-  if (!context) throw new ApiError('SillyTavern 上下文不可用');
+  if (!context) throw new ApiError('SillyTavern context unavailable');
   if (!channel.url.trim() || !channel.model.trim()) {
-    throw new ApiError('副 API 渠道未配置完整（缺少地址或模型）');
+    throw new ApiError('Secondary API channel is incomplete (missing URL or model)');
   }
 
   const outputMessages =
@@ -195,12 +195,12 @@ async function requestAtUrl(
     });
     if (!response.ok) {
       const text = await response.text().catch(() => '');
-      throw new ApiError(`副 API 请求失败 (${response.status})：${text.slice(0, 300)}`, response.status);
+      throw new ApiError(`Secondary API request failed (${response.status}): ${text.slice(0, 300)}`, response.status);
     }
     const content = channel.stream
       ? await readSseContent(response)
       : extractContent(await response.json());
-    if (!content) throw new ApiError('副 API 返回空内容');
+    if (!content) throw new ApiError('Secondary API returned empty content');
     return content;
   });
 }
@@ -219,7 +219,7 @@ export async function requestViaMainApi(
 ): Promise<string> {
   const context = getContext();
   if (typeof context?.generateRaw !== 'function') {
-    throw new ApiError('当前 SillyTavern 版本不支持跟随主 API');
+    throw new ApiError('This SillyTavern version does not support following the main API');
   }
   if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
   const content = (
@@ -229,7 +229,7 @@ export async function requestViaMainApi(
     })
   )?.trim();
   if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
-  if (!content) throw new ApiError('主 API 返回空内容');
+  if (!content) throw new ApiError('Main API returned empty content');
   return content;
 }
 
@@ -242,7 +242,7 @@ export async function testChannel(channel: ApiChannel): Promise<{ ok: boolean; m
       primaryUrl,
     );
     if (channel.url.trim().replace(/\/+$/, '') !== primaryUrl) channel.url = primaryUrl;
-    return { ok: true, message: `连通正常，返回：${reply.slice(0, 40)}` };
+    return { ok: true, message: `Connection OK, returned: ${reply.slice(0, 40)}` };
   } catch (error) {
     if (!(error instanceof ApiError) || (error.status !== 404 && error.status !== 405)) {
       return { ok: false, message: error instanceof Error ? error.message : String(error) };
@@ -255,7 +255,7 @@ export async function testChannel(channel: ApiChannel): Promise<{ ok: boolean; m
         fallbackUrl,
       );
       channel.url = fallbackUrl;
-      return { ok: true, message: `连通正常，已改用：${fallbackUrl}，返回：${reply.slice(0, 40)}` };
+      return { ok: true, message: `Connection OK, switched to: ${fallbackUrl}, returned: ${reply.slice(0, 40)}` };
     } catch {
       return { ok: false, message: error.message };
     }
@@ -266,8 +266,8 @@ export async function fetchModels(
   channel: Pick<ApiChannel, 'url' | 'key' | 'timeoutSec'>,
 ): Promise<string[]> {
   const context = getContext();
-  if (!context) throw new ApiError('SillyTavern 上下文不可用');
-  if (!channel.url.trim()) throw new ApiError('请先填写 API 地址');
+  if (!context) throw new ApiError('SillyTavern context unavailable');
+  if (!channel.url.trim()) throw new ApiError('Enter the API URL first');
 
   const timeoutSec =
     Number.isFinite(channel.timeoutSec) && channel.timeoutSec > 0
@@ -286,11 +286,11 @@ export async function fetchModels(
     });
     if (!response.ok) {
       const text = await response.text().catch(() => '');
-      throw new ApiError(`拉取模型失败 (${response.status})：${text.slice(0, 200)}`);
+      throw new ApiError(`Failed to fetch models (${response.status}): ${text.slice(0, 200)}`);
     }
     const data = await response.json();
     if (data?.error && !Array.isArray(data?.data)) {
-      throw new ApiError(data?.message || '拉取模型失败');
+      throw new ApiError(data?.message || 'Failed to fetch models');
     }
     const list: unknown = data?.data ?? data?.models ?? [];
     if (!Array.isArray(list)) return [];

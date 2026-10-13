@@ -87,11 +87,11 @@ export const ui = reactive({
 });
 
 export const THEMES: Array<{ value: ThemeName; label: string; icon: string }> = [
-  { value: 'day', label: '日间', icon: 'sun' },
-  { value: 'night', label: '夜间', icon: 'moon' },
-  { value: 'pastel', label: '粉彩', icon: 'sparkles' },
-  { value: 'green', label: '木白', icon: 'leaf' },
-  { value: 'st', label: '跟随ST', icon: 'plug' },
+  { value: 'day', label: 'Day', icon: 'sun' },
+  { value: 'night', label: 'Night', icon: 'moon' },
+  { value: 'pastel', label: 'Pastel', icon: 'sparkles' },
+  { value: 'green', label: 'Wood white', icon: 'leaf' },
+  { value: 'st', label: 'Follow ST', icon: 'plug' },
 ];
 
 export function openPen(

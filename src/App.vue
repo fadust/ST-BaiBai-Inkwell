@@ -138,9 +138,9 @@ const viewingGenerationTarget = computed(() =>
   ),
 );
 const generationButtonLabel = computed(() => {
-  if (!generating.value) return ui.stage === 'annotate' ? '生成' : '重新生成';
-  if (viewingGenerationTarget.value) return '生成中…';
-  return `#${generationTask.value?.floor ?? ''} 生成中`;
+  if (!generating.value) return ui.stage === 'annotate' ? 'Generate' : 'Regenerate';
+  if (viewingGenerationTarget.value) return 'Generating…';
+  return `#${generationTask.value?.floor ?? ''} generating`;
 });
 
 const phrases = computed(() =>
@@ -272,9 +272,9 @@ async function confirmUpdate(): Promise<void> {
   updateConfirmOpen.value = false;
   try {
     await performUpdate();
-    toastr?.success?.('更新成功，正在刷新页面…', '柏宝砚');
+    toastr?.success?.('Update succeeded, reloading page…', 'BaiBai Inkwell');
   } catch (error) {
-    toastr?.error?.(`更新失败：${error instanceof Error ? error.message : String(error)}`, '柏宝砚');
+    toastr?.error?.(`Update failed: ${error instanceof Error ? error.message : String(error)}`, 'BaiBai Inkwell');
   }
 }
 
@@ -343,10 +343,10 @@ function restoreWorkspaceDraft(draft: WorkspaceDraftSnapshot): void {
 
 function formatContextSummary(result: RewriteResult): string {
   return [
-    `历史消息 ${result.historyMessageCount} 条`,
-    result.contextParts.charCard ? '角色设定' : '',
-    result.contextParts.persona ? '用户设定' : '',
-    result.contextParts.worldInfo ? '世界书' : '',
+    `${result.historyMessageCount} history messages`,
+    result.contextParts.charCard ? 'Character settings' : '',
+    result.contextParts.persona ? 'User persona' : '',
+    result.contextParts.worldInfo ? 'World Info' : '',
   ].filter(Boolean).join(' · ');
 }
 
@@ -368,10 +368,10 @@ const channelMenuOpen = ref(false);
 const channelMenu = ref<HTMLElement | null>(null);
 
 const selectedChannelLabel = computed(() => {
-  if (!selectedChannelId.value) return '跟随主 API';
+  if (!selectedChannelId.value) return 'Follow main API';
   const channel = channels.find(item => item.id === selectedChannelId.value);
-  if (!channel) return '跟随主 API';
-  return `${channel.name || '未命名渠道'} · ${channel.model || '未设模型'}`;
+  if (!channel) return 'Follow main API';
+  return `${channel.name || 'Unnamed channel'} · ${channel.model || 'No model set'}`;
 });
 
 function toggleChannelMenu(): void {
@@ -483,8 +483,8 @@ const pagedFloorRows = computed<FloorPreviewRow[]>(() => {
     }));
 });
 const floorPagerInfo = computed(() => {
-  const head = floorQuery.value.trim() ? `匹配 ${filteredFloorRows.value.length} 楼` : `共 ${visibleFloorRows.value.length} 楼`;
-  return `${head} · 第 ${floorPage.value + 1} / ${floorPageCount.value} 页`;
+  const head = floorQuery.value.trim() ? `${filteredFloorRows.value.length} matching messages` : `${visibleFloorRows.value.length} messages`;
+  return `${head} · page ${floorPage.value + 1} / ${floorPageCount.value}`;
 });
 
 watch(floorQuery, () => {
@@ -557,16 +557,16 @@ watch(
 
 function enterFloor(floor: number): void {
   const ok = openFloorInPen(floor);
-  if (!ok) showToast('无法打开该楼层');
+  if (!ok) showToast('Cannot open this message');
 }
 
 async function onToggleFloorHidden(floor: number): Promise<void> {
   try {
     const nowHidden = await toggleFloorHidden(floor);
     refreshFloorRows();
-    showToast(nowHidden ? `已隐藏第 ${floor} 层` : `已显示第 ${floor} 层`);
+    showToast(nowHidden ? `Message ${floor} hidden` : `Message ${floor} shown`);
   } catch (error) {
-    showToast(error instanceof Error ? error.message : '操作失败');
+    showToast(error instanceof Error ? error.message : 'Operation failed');
   }
 }
 
@@ -584,9 +584,9 @@ async function onDeleteFloor(floor: number): Promise<void> {
       ui.paragraphs = [];
     }
     refreshFloorRows();
-    showToast(`已删除第 ${floor} 层及之后 ${deleted} 层`);
+    showToast(`Deleted message ${floor} and the ${deleted} after it`);
   } catch (error) {
-    showToast(error instanceof Error ? error.message : '删除失败');
+    showToast(error instanceof Error ? error.message : 'Delete failed');
   }
 }
 
@@ -596,7 +596,7 @@ const shootingFloor = ref<number | null>(null);
 async function onShootFloor(floor: number): Promise<void> {
   if (shootingFloor.value != null) return;
   shootingFloor.value = floor;
-  showToast(`正在生成第 ${floor} 层截图…`);
+  showToast(`Capturing screenshot of message ${floor}…`);
   try {
     const { blob, outcome } = await captureFloorShot(floor);
     downloadBlob(blob, outcome.suggestedName);
@@ -604,15 +604,15 @@ async function onShootFloor(floor: number): Promise<void> {
       const missed = outcome.frontendBlocks - outcome.iframesCaptured;
       toastr?.warning?.(
         outcome.floorInDom
-          ? `截图已保存，但有 ${missed} 个前端界面未渲染，以代码块显示`
-          : `截图已保存，但楼层未加载到聊天区，${missed} 个前端界面以代码块显示`,
-        '柏宝砚',
+          ? `Screenshot saved, but ${missed} front-end widgets did not render and are shown as code blocks`
+          : `Screenshot saved, but the message was not loaded in the chat, so ${missed} front-end widgets are shown as code blocks`,
+        'BaiBai Inkwell',
       );
     } else {
-      showToast(`第 ${floor} 层截图已保存`);
+      showToast(`Screenshot of message ${floor} saved`);
     }
   } catch (error) {
-    showToast(error instanceof Error ? error.message : '截图失败');
+    showToast(error instanceof Error ? error.message : 'Screenshot failed');
   } finally {
     shootingFloor.value = null;
   }
@@ -641,7 +641,7 @@ function discardGenerationTask(taskId: number, notify = false): void {
   if (!task || task.id !== taskId) return;
   task.controller.abort();
   generationTask.value = null;
-  if (notify) showToast('聊天已切换，本次生成结果已丢弃');
+  if (notify) showToast('Chat switched; this generation result was discarded');
 }
 
 async function reconcileGenerationTask(expectedTaskId?: number): Promise<void> {
@@ -660,17 +660,17 @@ async function reconcileGenerationTask(expectedTaskId?: number): Promise<void> {
   const currentText = getFloorSourceText(task.floor);
   if (currentText == null) {
     generationTask.value = null;
-    toastr?.warning?.(`生成目标楼层 #${task.floor} 已不存在，结果已丢弃`, '柏宝砚');
+    toastr?.warning?.(`Target message #${task.floor} no longer exists; result discarded`, 'BaiBai Inkwell');
     return;
   }
   if (currentText !== task.originalText) {
     generationTask.value = null;
-    toastr?.warning?.(`楼层 #${task.floor} 在生成期间已发生变化，结果已丢弃`, '柏宝砚');
+    toastr?.warning?.(`Message #${task.floor} changed during generation; result discarded`, 'BaiBai Inkwell');
     return;
   }
   if (!openFloorInPen(task.floor)) {
     generationTask.value = null;
-    toastr?.warning?.(`无法重新打开生成目标楼层 #${task.floor}`, '柏宝砚');
+    toastr?.warning?.(`Cannot reopen target message #${task.floor}`, 'BaiBai Inkwell');
     return;
   }
 
@@ -699,7 +699,7 @@ async function reconcileGenerationTask(expectedTaskId?: number): Promise<void> {
     reviewDecision.value = {};
     generationError.value = task.outcome.message;
     ui.stage = 'annotate';
-    showToast('生成失败');
+    showToast('Generation failed');
   }
 
   generationTask.value = null;
@@ -735,11 +735,11 @@ onUnmounted(() => {
 async function startReview(): Promise<void> {
   if (generationTask.value || saving.value || replacing.value) return;
   if (!hasInstructions.value) {
-    showToast('请先添加行标注或整体要求');
+    showToast('Add a line annotation or an overall request first');
     return;
   }
   if (ui.floor == null || !ui.originalText.trim()) {
-    showToast('当前楼层不可用');
+    showToast('Current message unavailable');
     return;
   }
   contextRounds.value = Math.min(10, Math.max(0, Math.floor(Number(contextRounds.value) || 0)));
@@ -748,7 +748,7 @@ async function startReview(): Promise<void> {
   const chatId = getOpenChatId(context);
   const chatIdentity = getOpenChatIdentity(context);
   if (!chatId || !chatIdentity) {
-    showToast('当前聊天不可用');
+    showToast('Current chat unavailable');
     return;
   }
 
@@ -830,7 +830,7 @@ function cancelGeneration(): void {
   if (!task || task.outcome) return;
   task.controller.abort();
   generationTask.value = null;
-  showToast('已取消生成');
+  showToast('Generation cancelled');
 }
 
 function backToAnnotate(): void {
@@ -911,7 +911,7 @@ function applyBulkAnnotation(): void {
   bulkPhraseIds.value = [];
   bulkNote.value = '';
   workMode.value = 'annotate';
-  showToast(`已把要求应用到 ${count} 段`);
+  showToast(`Request applied to ${count} paragraphs`);
 }
 
 function cancelMultiSelect(): void {
@@ -937,7 +937,7 @@ const editDirty = computed(() =>
 async function saveManualEdit(): Promise<void> {
   if (saving.value || replacing.value || generating.value || viewingGenerationTarget.value) return;
   if (ui.floor == null) {
-    showToast('当前楼层不可用');
+    showToast('Current message unavailable');
     return;
   }
   const replacements = new Map<number, string>();
@@ -946,12 +946,12 @@ async function saveManualEdit(): Promise<void> {
     if (draft !== paragraph.text) replacements.set(paragraph.id, draft);
   });
   if (!replacements.size) {
-    showToast('内容没有变化');
+    showToast('Nothing changed');
     return;
   }
   const nextText = applyParagraphReplacements(ui.originalText, replacements);
   if (!nextText.trim()) {
-    showToast('不能把楼层保存为空');
+    showToast('Cannot save the message as empty');
     return;
   }
 
@@ -963,24 +963,24 @@ async function saveManualEdit(): Promise<void> {
   try {
     const result = await applyFloorText(floor, originalText, nextText, chatId);
     if (result === 'chat-changed') {
-      showToast('当前聊天已经切换，不能保存修改');
+      showToast('The chat has switched; changes cannot be saved');
       return;
     }
     if (result === 'floor-changed') {
-      showToast('楼层内容已经变化，请重新打开砚');
+      showToast('Message content has changed; reopen Inkwell');
       return;
     }
     if (result !== 'saved') {
-      showToast('无法保存当前楼层');
+      showToast('Cannot save the current message');
       return;
     }
     // 重开楼层让段落与最新内容对齐;行号可能已变,原有标注由会话重置一并清掉
     if (ui.floor === floor && ui.chatId === chatId) {
       openFloorInPen(floor);
     }
-    showToast(hadMarks ? '修改已保存，原有标注已随行号变化重置' : '修改已保存到楼层');
+    showToast(hadMarks ? 'Changes saved; existing annotations were reset because line numbers changed' : 'Changes saved to the message');
   } catch (error) {
-    showToast(error instanceof Error ? error.message : '保存楼层失败');
+    showToast(error instanceof Error ? error.message : 'Failed to save message');
   } finally {
     saving.value = false;
   }
@@ -1044,10 +1044,10 @@ const editedAcceptedCount = computed(
 );
 
 const applyButtonLabel = computed(() => {
-  if (saving.value) return '保存中…';
-  if (acceptedCount.value === 0) return '丢弃全部';
-  const base = `应用 ${acceptedCount.value} 行`;
-  return editedAcceptedCount.value > 0 ? `${base}（含 ${editedAcceptedCount.value} 处手改）` : base;
+  if (saving.value) return 'Saving…';
+  if (acceptedCount.value === 0) return 'Discard all';
+  const base = `Apply ${acceptedCount.value} lines`;
+  return editedAcceptedCount.value > 0 ? `${base} (${editedAcceptedCount.value} manual edits)` : base;
 });
 
 async function finishReview(): Promise<void> {
@@ -1055,7 +1055,7 @@ async function finishReview(): Promise<void> {
   if (ui.floor == null || !rewriteChanges.value.length) return;
   if (acceptedCount.value === 0) {
     closePen();
-    toastr?.info?.('已丢弃全部改写结果，原楼层未发生变化', '柏宝砚');
+    toastr?.info?.('Discarded all rewrite results; the original message is unchanged', 'BaiBai Inkwell');
     return;
   }
   const accepted = new Map(
@@ -1069,21 +1069,21 @@ async function finishReview(): Promise<void> {
   try {
     const result = await applyFloorText(ui.floor, ui.originalText, nextText, ui.chatId);
     if (result === 'chat-changed') {
-      showToast('当前聊天已经切换，不能应用结果');
+      showToast('The chat has switched; results cannot be applied');
       return;
     }
     if (result === 'floor-changed') {
-      showToast('楼层内容已经变化，请重新打开砚');
+      showToast('Message content has changed; reopen Inkwell');
       return;
     }
     if (result !== 'saved') {
-      showToast('无法保存当前楼层');
+      showToast('Cannot save the current message');
       return;
     }
     closePen();
-    toastr?.info?.(`改写结果已保存到楼层 #${ui.floor}`, '柏宝砚');
+    toastr?.info?.(`Rewrite results saved to message #${ui.floor}`, 'BaiBai Inkwell');
   } catch (error) {
-    showToast(error instanceof Error ? error.message : '保存楼层失败');
+    showToast(error instanceof Error ? error.message : 'Failed to save message');
   } finally {
     saving.value = false;
   }
@@ -1135,7 +1135,7 @@ function closeModelMenuSoon(): void {
 
 function openChannel(channel?: ApiChannel): void {
   if (!sharingState.ready) {
-    showToast('渠道正在载入');
+    showToast('Channels are loading');
     return;
   }
   if (!canEditChannels()) {
@@ -1156,14 +1156,14 @@ function openChannel(channel?: ApiChannel): void {
 function saveChannel(): void {
   if (!channelDraft.value) return;
   if (!channelDraft.value.name.trim()) {
-    showToast('请填写渠道名');
+    showToast('Enter a channel name');
     return;
   }
   saveSharedChannel(channelDraft.value);
   selectedChannelId.value = channelDraft.value.id;
   rememberSelectedChannel();
   channelDraft.value = null;
-  showToast('渠道已保存');
+  showToast('Channel saved');
 }
 
 function removeChannel(): void {
@@ -1172,12 +1172,12 @@ function removeChannel(): void {
   channelDraft.value = null;
   selectedChannelId.value = channels[0]?.id ?? '';
   rememberSelectedChannel();
-  showToast('渠道已删除');
+  showToast('Channel deleted');
 }
 
 async function testChannel(): Promise<void> {
   if (!channelDraft.value) return;
-  testMessage.value = '测试中…';
+  testMessage.value = 'Testing…';
   const result = await testApiChannel(channelDraft.value);
   testMessage.value = result.message;
 }
@@ -1185,15 +1185,15 @@ async function testChannel(): Promise<void> {
 async function loadModels(): Promise<void> {
   if (!channelDraft.value || loadingModels.value) return;
   loadingModels.value = true;
-  testMessage.value = '正在拉取模型…';
+  testMessage.value = 'Fetching models…';
   try {
     modelOptions.value = await fetchModels(channelDraft.value);
     if (!channelDraft.value.model && modelOptions.value[0]) {
       channelDraft.value.model = modelOptions.value[0];
     }
     testMessage.value = modelOptions.value.length
-      ? `已获取 ${modelOptions.value.length} 个模型`
-      : '接口没有返回可用模型';
+      ? `Fetched ${modelOptions.value.length} models`
+      : 'The endpoint returned no usable models';
   } catch (error) {
     testMessage.value = error instanceof Error ? error.message : String(error);
   } finally {
@@ -1209,14 +1209,14 @@ function openPhrase(phrase?: QuickPhrase): void {
 
 function savePhrase(): void {
   if (!phraseDraft.value?.name.trim() || !phraseDraft.value.instruction.trim()) {
-    showToast('请填写名称和指令');
+    showToast('Enter a name and an instruction');
     return;
   }
   const index = penSettings.phrases.findIndex(phrase => phrase.id === phraseDraft.value?.id);
   if (index >= 0) penSettings.phrases[index] = phraseDraft.value;
   else penSettings.phrases.push(phraseDraft.value);
   phraseDraft.value = null;
-  showToast('快捷语句已保存');
+  showToast('Quick phrase saved');
 }
 
 function removePhrase(): void {
@@ -1236,11 +1236,11 @@ const quickIsRegex = ref(false);
 async function applyReplacement(result: ReplacementResult): Promise<void> {
   if (replacing.value || viewingGenerationTarget.value || saving.value) return;
   if (ui.floor == null) {
-    showToast('当前楼层不可用');
+    showToast('Current message unavailable');
     return;
   }
   if (!result.count || result.text === ui.originalText) {
-    showToast(result.count ? '替换后内容没有变化' : '当前楼层没有匹配内容');
+    showToast(result.count ? 'Replacement made no change' : 'No matches in the current message');
     return;
   }
 
@@ -1251,24 +1251,24 @@ async function applyReplacement(result: ReplacementResult): Promise<void> {
   try {
     const applyResult = await applyFloorText(floor, originalText, result.text, chatId);
     if (applyResult === 'chat-changed') {
-      showToast('当前聊天已经切换，不能执行替换');
+      showToast('The chat has switched; replacement cannot run');
       return;
     }
     if (applyResult === 'floor-changed') {
-      showToast('楼层内容已经变化，请重新打开砚');
+      showToast('Message content has changed; reopen Inkwell');
       return;
     }
     if (applyResult !== 'saved') {
-      showToast('无法保存当前楼层');
+      showToast('Cannot save the current message');
       return;
     }
 
     if (ui.floor === floor && ui.chatId === chatId) {
       openFloorInPen(floor);
     }
-    showToast(`已替换 ${result.count} 处`);
+    showToast(`Replaced ${result.count} occurrences`);
   } catch (error) {
-    showToast(error instanceof Error ? error.message : '替换失败');
+    showToast(error instanceof Error ? error.message : 'Replace failed');
   } finally {
     replacing.value = false;
   }
@@ -1284,7 +1284,7 @@ async function runQuickReplace(): Promise<void> {
       }),
     );
   } catch (error) {
-    showToast(error instanceof Error ? `正则表达式无效：${error.message}` : '替换失败');
+    showToast(error instanceof Error ? `Invalid regular expression: ${error.message}` : 'Replace failed');
   }
 }
 
@@ -1307,14 +1307,14 @@ function openRule(rule?: ReplaceRule): void {
 
 function saveRule(): void {
   if (!ruleDraft.value?.name.trim() || !ruleDraft.value.pattern) {
-    showToast('请填写规则名和匹配内容');
+    showToast('Enter a rule name and match text');
     return;
   }
   const index = penSettings.replaceRules.findIndex(rule => rule.id === ruleDraft.value?.id);
   if (index >= 0) penSettings.replaceRules[index] = ruleDraft.value;
   else penSettings.replaceRules.push(ruleDraft.value);
   ruleDraft.value = null;
-  showToast('替换规则已保存');
+  showToast('Replacement rule saved');
 }
 
 function removeRule(): void {
@@ -1329,7 +1329,7 @@ async function runReplace(): Promise<void> {
   try {
     await applyReplacement(replaceTextWithRules(ui.originalText, enabledRules));
   } catch (error) {
-    showToast(error instanceof Error ? error.message : '执行规则失败');
+    showToast(error instanceof Error ? error.message : 'Failed to run rules');
   }
 }
 
@@ -1344,14 +1344,14 @@ interface PromptMeta {
 const PROMPT_METAS: PromptMeta[] = [
   {
     key: 'jailbreak',
-    label: '破限提示词',
-    hint: '作为置顶 system 附加在改写请求里，降低拒答率。留空则用内置默认。',
+    label: 'System prompt',
+    hint: 'Added as a top system message to rewrite requests. Leave empty to use the built-in default.',
     builtin: JAILBREAK_PROMPT,
   },
   {
     key: 'chainOfThought',
-    label: '思维链提示词',
-    hint: '在最终改写任务之后追加，引导模型先审稿判断再返回逐行补丁。留空则用内置默认。',
+    label: 'Chain-of-thought prompt',
+    hint: 'Appended after the final rewrite task so the model reviews first, then returns line patches. Leave empty to use the built-in default.',
     builtin: CHAIN_OF_THOUGHT_PROMPT,
   },
 ];
@@ -1381,7 +1381,7 @@ function savePrompt(): void {
   const v = promptDraft.value.trim();
   penSettings.prompts[meta.key] = v === meta.builtin.trim() ? '' : promptDraft.value;
   closePrompt();
-  showToast('提示词已保存');
+  showToast('Prompts saved');
 }
 // 「恢复默认」:把草稿重置回内置模板(保存后即回落内置)
 function resetPrompt(): void {
@@ -1415,31 +1415,31 @@ function onOverlayClick(event: MouseEvent): void {
         @click="onOverlayClick"
         @keydown.esc="closePen"
       >
-        <section class="bby-window" role="dialog" aria-modal="true" aria-label="柏宝砚">
+        <section class="bby-window" role="dialog" aria-modal="true" aria-label="BaiBai Inkwell">
           <div class="bby-mobile-grabber"><span></span></div>
 
           <header class="bby-header">
-            <span class="bby-brand-name">柏宝砚</span>
+            <span class="bby-brand-name">BaiBai Inkwell</span>
             <div class="bby-header-actions">
-              <button class="bby-icon-button" type="button" :title="`切换主题：${nextTheme.label}`" @click="cycleTheme">
+              <button class="bby-icon-button" type="button" :title="`Switch theme: ${nextTheme.label}`" @click="cycleTheme">
                 <Icon :name="nextTheme.icon" />
               </button>
-              <button class="bby-icon-button" type="button" title="关闭" @click="closePen">
+              <button class="bby-icon-button" type="button" title="Close" @click="closePen">
                 <Icon name="close" />
               </button>
             </div>
           </header>
 
-          <nav class="bby-main-nav" aria-label="主导航">
+          <nav class="bby-main-nav" aria-label="Main navigation">
             <button type="button" :class="{ 'is-active': ui.page === 'floors' }" @click="ui.page = 'floors'">
-              <Icon name="list" /> 楼层
+              <Icon name="list" /> Messages
             </button>
             <button type="button" :class="{ 'is-active': ui.page === 'workspace' }" :disabled="ui.floor == null" @click="goToWorkspace">
-              <Icon name="workspace" /> 工作台
+              <Icon name="workspace" /> Workbench
             </button>
             <button type="button" :class="{ 'is-active': ui.page === 'settings' }" @click="ui.page = 'settings'">
-              <Icon name="settings" /> 设置
-              <span v-if="updateState.available" class="bby-nav-dot" aria-label="有可用更新"></span>
+              <Icon name="settings" /> Settings
+              <span v-if="updateState.available" class="bby-nav-dot" aria-label="Update available"></span>
             </button>
           </nav>
 
@@ -1449,11 +1449,11 @@ function onOverlayClick(event: MouseEvent): void {
               <div v-if="ui.stage === 'annotate'" class="bby-work-tabs bby-status-strip">
                 <span class="bby-strip-meta">
                   <span class="bby-floor-number">{{ ui.floorLabel }}</span>
-                  <span v-if="workMode === 'annotate'">已标注 <b>{{ markedCount }}</b> 行</span>
-                  <span v-else-if="workMode === 'multi'">已选 <b>{{ multiSelected.length }}</b> 段</span>
-                  <span v-else>手动修改原文，不经过 AI</span>
+                  <span v-if="workMode === 'annotate'">Annotated <b>{{ markedCount }}</b> lines</span>
+                  <span v-else-if="workMode === 'multi'">Selected <b>{{ multiSelected.length }}</b> paragraphs</span>
+                  <span v-else>Edit the original by hand, without AI</span>
                 </span>
-                <div class="bby-segmented bby-mode-switch" role="tablist" aria-label="工作台模式">
+                <div class="bby-segmented bby-mode-switch" role="tablist" aria-label="Workbench mode">
                   <button
                     type="button"
                     class="bby-seg"
@@ -1461,7 +1461,7 @@ function onOverlayClick(event: MouseEvent): void {
                     :disabled="generating || saving || replacing"
                     @click="setWorkMode('annotate')"
                   >
-                    标注
+                    Annotate
                   </button>
                   <button
                     type="button"
@@ -1470,7 +1470,7 @@ function onOverlayClick(event: MouseEvent): void {
                     :disabled="generating || viewingGenerationTarget || saving || replacing"
                     @click="setWorkMode('multi')"
                   >
-                    多选
+                    Multi-select
                   </button>
                   <button
                     type="button"
@@ -1479,7 +1479,7 @@ function onOverlayClick(event: MouseEvent): void {
                     :disabled="generating || viewingGenerationTarget || saving || replacing"
                     @click="setWorkMode('edit')"
                   >
-                    <Icon name="pen" /> 编辑
+                    <Icon name="pen" /> Edit
                   </button>
                 </div>
               </div>
@@ -1490,48 +1490,48 @@ function onOverlayClick(event: MouseEvent): void {
                   <strong>{{ ui.speaker }}</strong>
                 </div>
                 <div class="bby-doc-status">
-                  <span>AI 建议 <b>{{ reviewRows.length }}</b> 项 · 已选 <b>{{ acceptedCount }}</b> 行</span>
+                  <span>AI suggestions <b>{{ reviewRows.length }}</b> items · selected <b>{{ acceptedCount }}</b> lines</span>
                   <button class="bby-text-action" type="button" @click="backToAnnotate">
-                    <Icon name="undo" /> 返回标注
+                    <Icon name="undo" /> Back to annotations
                   </button>
                 </div>
               </div>
 
-              <main v-if="ui.stage === 'annotate'" class="bby-document" aria-label="楼层全文">
-                <Collapsible v-if="workMode === 'annotate'" title="整体要求" class="bby-work-fold">
+              <main v-if="ui.stage === 'annotate'" class="bby-document" aria-label="Full message">
+                <Collapsible v-if="workMode === 'annotate'" title="Overall request" class="bby-work-fold">
                   <template #badge>
                     <i v-if="generalFilled" class="bby-tab-dot"></i>
                   </template>
                   <section class="bby-general-editor">
-                    <p class="bby-field-hint">作用于当前楼层全文的要求，与行标注一起发给 AI。</p>
+                    <p class="bby-field-hint">A request that applies to the whole current message; sent to the AI with the line annotations.</p>
                     <PhrasePicker v-if="phrases.length" v-model="globalPhraseIds" :phrases="phrases" />
                     <textarea
                       v-model="generalNote"
                       class="bby-input bby-general-note"
-                      placeholder="可选：填写作用于当前楼层全文的要求"
+                      placeholder="Optional: a request that applies to the whole current message"
                     ></textarea>
                     <div class="bby-carry-options">
                       <label class="bby-switch-row bby-carry-row">
-                        <span>携带上下文轮数</span>
+                        <span>Context rounds to include</span>
                         <input v-model.number="contextRounds" class="bby-input bby-rounds-input" type="number" min="0" max="10" step="1" />
                       </label>
                       <label class="bby-switch-row bby-carry-row">
-                        <span>携带世界书</span>
+                        <span>Include World Info</span>
                         <input v-model="carryWorldbook" type="checkbox" class="bby-checkbox" />
                       </label>
                       <label class="bby-switch-row bby-carry-row">
-                        <span>携带角色描述</span>
+                        <span>Include character description</span>
                         <input v-model="carryCharDesc" type="checkbox" class="bby-checkbox" />
                       </label>
                       <label class="bby-switch-row bby-carry-row">
-                        <span>携带User描述</span>
+                        <span>Include User persona</span>
                         <input v-model="carryUserDesc" type="checkbox" class="bby-checkbox" />
                       </label>
                     </div>
                   </section>
                 </Collapsible>
 
-                <Collapsible title="查找替换" class="bby-work-fold">
+                <Collapsible title="Find and replace" class="bby-work-fold">
                   <template #badge>
                     <em v-if="enabledRuleCount" class="bby-tab-count">{{ enabledRuleCount }}</em>
                   </template>
@@ -1542,19 +1542,19 @@ function onOverlayClick(event: MouseEvent): void {
                           v-model="quickFind"
                           class="bby-input bby-mono"
                           type="text"
-                          placeholder="查找（正则支持 /pattern/gi）"
+                          placeholder="Find (regex supports /pattern/gi)"
                         />
                         <input
                           v-model="quickReplacement"
                           class="bby-input bby-mono"
                           type="text"
-                          placeholder="替换为（留空即删除）"
+                          placeholder="Replace with (leave empty to delete)"
                         />
                       </div>
                       <div class="bby-quick-actions">
                         <label class="bby-quick-regex">
                           <input v-model="quickIsRegex" type="checkbox" class="bby-checkbox" />
-                          <span>正则</span>
+                          <span>Regex</span>
                         </label>
                         <button
                           class="bby-button bby-btn-sm"
@@ -1562,7 +1562,7 @@ function onOverlayClick(event: MouseEvent): void {
                           :disabled="replacing || !quickFind"
                           @click="saveQuickAsRule"
                         >
-                          <Icon name="plus" /> 存为规则
+                          <Icon name="plus" /> Save as rule
                         </button>
                         <button
                           class="bby-button bby-primary bby-btn-sm"
@@ -1570,15 +1570,15 @@ function onOverlayClick(event: MouseEvent): void {
                           :disabled="replacing || viewingGenerationTarget || saving || !quickFind"
                           @click="runQuickReplace"
                         >
-                          <Icon name="replace" /> {{ replacing ? '替换中…' : '替换' }}
+                          <Icon name="replace" /> {{ replacing ? 'Replacing…' : 'Replace' }}
                         </button>
                       </div>
                     </div>
 
                     <div class="bby-rule-lib">
                       <div class="bby-rule-lib-head">
-                        <span class="bby-field-label">规则库</span>
-                        <button class="bby-text-action bby-rule-add" type="button" title="添加规则" @click="openRule()">
+                        <span class="bby-field-label">Rule library</span>
+                        <button class="bby-text-action bby-rule-add" type="button" title="Add rule" @click="openRule()">
                           <Icon name="plus" />
                         </button>
                       </div>
@@ -1593,7 +1593,7 @@ function onOverlayClick(event: MouseEvent): void {
                             v-model="rule.enabled"
                             type="checkbox"
                             class="bby-checkbox"
-                            :title="rule.enabled ? '停用这条规则' : '启用这条规则'"
+                            :title="rule.enabled ? 'Disable this rule' : 'Enable this rule'"
                           />
                           <button class="bby-rule-open" type="button" @click="openRule(rule)">
                             <span class="bby-rule-main">
@@ -1601,19 +1601,19 @@ function onOverlayClick(event: MouseEvent): void {
                               <small>
                               <code>{{ rule.pattern }}</code>
                               <span class="bby-rule-sep">→</span>
-                              <code>{{ rule.replacement || '删除' }}</code>
+                              <code>{{ rule.replacement || 'Delete' }}</code>
                             </small>
                             </span>
-                            <span v-if="rule.isRegex" class="bby-tag">正则</span>
+                            <span v-if="rule.isRegex" class="bby-tag">Regex</span>
                             <Icon name="chevron" />
                           </button>
                         </li>
                       </ul>
-                      <p v-else class="bby-rule-empty">还没有规则。把常用的清理存成规则，之后勾选即可反复用。</p>
+                      <p v-else class="bby-rule-empty">No rules yet. Save common clean-ups as rules, then tick them to reuse.</p>
 
                       <div class="bby-rule-run">
                         <span class="bby-replace-summary">
-                          {{ enabledRuleCount ? `已启用 ${enabledRuleCount} 条规则` : '还没有启用的规则' }}
+                          {{ enabledRuleCount ? `${enabledRuleCount} rules enabled` : 'No rules enabled' }}
                         </span>
                         <button
                           class="bby-button bby-btn-sm"
@@ -1621,7 +1621,7 @@ function onOverlayClick(event: MouseEvent): void {
                           :disabled="replacing || viewingGenerationTarget || saving || !enabledRuleCount"
                           @click="runReplace"
                         >
-                          <Icon name="replace" /> {{ replacing ? '执行中…' : '执行规则' }}
+                          <Icon name="replace" /> {{ replacing ? 'Running…' : 'Run rules' }}
                         </button>
                       </div>
                     </div>
@@ -1646,7 +1646,7 @@ function onOverlayClick(event: MouseEvent): void {
                     class="bby-para-text bby-para-edit"
                     rows="1"
                     spellcheck="false"
-                    aria-label="手动编辑本行"
+                    aria-label="Edit this line by hand"
                   ></textarea>
                   <template v-else-if="workMode === 'multi'">
                     <button
@@ -1661,7 +1661,7 @@ function onOverlayClick(event: MouseEvent): void {
                     </button>
                     <div v-if="isMarked(paragraph.id)" class="bby-para-tags">
                       <span v-for="name in markedNames(paragraph.id)" :key="name" class="bby-tag">{{ name }}</span>
-                      <span v-if="paragraphNotes[paragraph.id]?.trim()" class="bby-tag">+ 补充要求</span>
+                      <span v-if="paragraphNotes[paragraph.id]?.trim()" class="bby-tag">+ Add request</span>
                     </div>
                   </template>
                   <template v-else>
@@ -1676,14 +1676,14 @@ function onOverlayClick(event: MouseEvent): void {
 
                   <div v-if="expandedId !== paragraph.id && isMarked(paragraph.id)" class="bby-para-tags">
                     <span v-for="name in markedNames(paragraph.id)" :key="name" class="bby-tag">{{ name }}</span>
-                    <span v-if="paragraphNotes[paragraph.id]?.trim()" class="bby-tag">+ 补充要求</span>
+                    <span v-if="paragraphNotes[paragraph.id]?.trim()" class="bby-tag">+ Add request</span>
                   </div>
 
                   <Transition name="bby-expand">
                     <div v-if="expandedId === paragraph.id" class="bby-para-editor">
                       <div class="bby-para-editor-head">
-                        <span>改写要求</span>
-                        <button class="bby-icon-mini bby-danger-hover" type="button" title="清除本行标注" @click="clearMark(paragraph.id)">
+                        <span>Rewrite request</span>
+                        <button class="bby-icon-mini bby-danger-hover" type="button" title="Clear this line's annotation" @click="clearMark(paragraph.id)">
                           <Icon name="trash" />
                         </button>
                       </div>
@@ -1696,10 +1696,10 @@ function onOverlayClick(event: MouseEvent): void {
                       <textarea
                         v-model="noteDraft"
                         class="bby-input bby-note"
-                        placeholder="填写希望如何修改这一行"
+                        placeholder="Describe how this line should change"
                       ></textarea>
                       <button class="bby-text-action" type="button" @click="ui.page = 'settings'">
-                        <Icon name="settings" /> 管理快捷语句
+                        <Icon name="settings" /> Manage quick phrases
                       </button>
                     </div>
                   </Transition>
@@ -1710,7 +1710,7 @@ function onOverlayClick(event: MouseEvent): void {
                 <p v-if="generationError" class="bby-error-message">{{ generationError }}</p>
               </main>
 
-              <main v-else class="bby-document bby-review-document" aria-label="改写结果">
+              <main v-else class="bby-document bby-review-document" aria-label="Rewrite results">
                 <p v-if="contextSummary" class="bby-context-summary">{{ contextSummary }}</p>
                 <p v-if="generationError" class="bby-error-message">{{ generationError }}</p>
                 <div
@@ -1722,14 +1722,14 @@ function onOverlayClick(event: MouseEvent): void {
                   <div class="bby-review-row-head">
                     <span class="bby-floor-number">{{ row.label }}</span>
                     <span class="bby-tag">
-                      {{ row.deleted ? row.paragraphs.length > 1 ? `删除 ${row.paragraphs.length} 行` : '删除行' : row.marked ? '标注行' : '关联调整' }}
+                      {{ row.deleted ? row.paragraphs.length > 1 ? `Delete ${row.paragraphs.length} lines` : 'Delete line' : row.marked ? 'Annotated line' : 'Related adjustment' }}
                     </span>
-                    <span v-if="rowEditedResult(row) !== null" class="bby-tag bby-tag-edited">已手改</span>
+                    <span v-if="rowEditedResult(row) !== null" class="bby-tag bby-tag-edited">Edited by hand</span>
                     <button
                       v-if="!row.deleted"
                       class="bby-icon-mini bby-row-edit"
                       type="button"
-                      title="手动修改这条结果"
+                      title="Edit this result by hand"
                       @click="startResultEdit(row)"
                     >
                       <Icon name="pen" />
@@ -1737,11 +1737,11 @@ function onOverlayClick(event: MouseEvent): void {
                   </div>
                   <div class="bby-review-columns">
                     <div>
-                      <span class="bby-review-label">原文</span>
+                      <span class="bby-review-label">Original</span>
                       <p>{{ row.original }}</p>
                     </div>
                     <div>
-                      <span class="bby-review-label">改写结果</span>
+                      <span class="bby-review-label">Rewrite results</span>
                       <template v-if="isEditingRow(row)">
                         <textarea
                           v-model="resultDraft"
@@ -1749,13 +1749,13 @@ function onOverlayClick(event: MouseEvent): void {
                           class="bby-input bby-result-edit"
                           rows="1"
                           spellcheck="false"
-                          aria-label="手动修改这条改写结果"
+                          aria-label="Edit this rewrite result by hand"
                           @blur="finishResultEdit"
                           @keydown.esc="finishResultEdit"
                         ></textarea>
                         <div class="bby-result-edit-actions">
                           <button class="bby-text-action" type="button" @mousedown.prevent @click="finishResultEdit">
-                            <Icon name="check" /> 完成
+                            <Icon name="check" /> Done
                           </button>
                           <button
                             v-if="rowEditedResult(row) !== null"
@@ -1764,12 +1764,12 @@ function onOverlayClick(event: MouseEvent): void {
                             @mousedown.prevent
                             @click="revertResultEdit(row)"
                           >
-                            <Icon name="undo" /> 还原 AI 版
+                            <Icon name="undo" /> Restore AI version
                           </button>
                         </div>
                       </template>
                       <p v-else :class="{ 'bby-deleted-text': row.deleted || displayRowResult(row) === '' }">
-                        {{ row.deleted ? row.paragraphs.length > 1 ? `（删除连续 ${row.paragraphs.length} 行）` : '（删除整行）' : displayRowResult(row) === '' ? '（清空整行）' : displayRowResult(row) }}
+                        {{ row.deleted ? row.paragraphs.length > 1 ? `(delete ${row.paragraphs.length} consecutive lines)` : '(delete whole line)' : displayRowResult(row) === '' ? '(clear whole line)' : displayRowResult(row) }}
                       </p>
                     </div>
                   </div>
@@ -1779,14 +1779,14 @@ function onOverlayClick(event: MouseEvent): void {
                       :class="{ 'is-active': reviewRowDecision(row) === 'reject' }"
                       @click="setReviewRowDecision(row, 'reject')"
                     >
-                      {{ row.paragraphs.length > 1 ? '丢弃本组' : '丢弃本行' }}
+                      {{ row.paragraphs.length > 1 ? 'Discard group' : 'Discard line' }}
                     </button>
                     <button
                       type="button"
                       :class="{ 'is-active': reviewRowDecision(row) === 'accept' }"
                       @click="setReviewRowDecision(row, 'accept')"
                     >
-                      {{ row.paragraphs.length > 1 ? '应用本组' : '应用本行' }}
+                      {{ row.paragraphs.length > 1 ? 'Apply group' : 'Apply line' }}
                     </button>
                   </div>
                 </div>
@@ -1795,16 +1795,16 @@ function onOverlayClick(event: MouseEvent): void {
               <section
                 v-if="ui.stage === 'annotate' && workMode === 'multi'"
                 class="bby-bulk-editor"
-                aria-label="批量标注要求"
+                aria-label="Batch annotation request"
               >
                 <div class="bby-para-editor-head">
-                  <span>{{ multiSelected.length ? `已选 ${multiSelected.length} 段，填写共同要求` : '先点选上方段落' }}</span>
+                  <span>{{ multiSelected.length ? `${multiSelected.length} paragraphs selected; enter a shared request` : 'Select paragraphs above first' }}</span>
                 </div>
                 <PhrasePicker v-if="phrases.length" v-model="bulkPhraseIds" :phrases="phrases" />
                 <textarea
                   v-model="bulkNote"
                   class="bby-input bby-note bby-bulk-note"
-                  placeholder="填写希望如何修改选中的这几段"
+                  placeholder="Describe how the selected paragraphs should change"
                 ></textarea>
               </section>
 
@@ -1814,7 +1814,7 @@ function onOverlayClick(event: MouseEvent): void {
                     class="bby-channel-ghost"
                     type="button"
                     :aria-expanded="channelMenuOpen"
-                    title="改写渠道"
+                    title="Rewrite channel"
                     @click="toggleChannelMenu"
                   >
                     <Icon name="plug" />
@@ -1826,14 +1826,14 @@ function onOverlayClick(event: MouseEvent): void {
                       <li>
                         <button type="button" :class="{ 'is-active': !selectedChannelId }" @click="pickChannel('')">
                           <Icon name="check" class="bby-menu-check" />
-                          <span class="bby-menu-name">跟随主 API</span>
+                          <span class="bby-menu-name">Follow main API</span>
                         </button>
                       </li>
                       <li v-for="channel in channels" :key="channel.id">
                         <button type="button" :class="{ 'is-active': selectedChannelId === channel.id }" @click="pickChannel(channel.id)">
                           <Icon name="check" class="bby-menu-check" />
-                          <span class="bby-menu-name">{{ channel.name || '未命名渠道' }}</span>
-                          <span class="bby-menu-model">{{ channel.model || '未设模型' }}</span>
+                          <span class="bby-menu-name">{{ channel.name || 'Unnamed channel' }}</span>
+                          <span class="bby-menu-model">{{ channel.model || 'No model set' }}</span>
                         </button>
                       </li>
                     </ul>
@@ -1842,12 +1842,12 @@ function onOverlayClick(event: MouseEvent): void {
                 <span v-else></span>
                 <div class="bby-action-buttons">
                   <button v-if="generating" class="bby-button" type="button" @click="cancelGeneration">
-                    {{ viewingGenerationTarget ? '取消' : `取消 #${generationTask?.floor}` }}
+                    {{ viewingGenerationTarget ? 'Cancel' : `Cancel #${generationTask?.floor}` }}
                   </button>
                   <template v-if="ui.stage === 'annotate'">
                     <template v-if="workMode === 'edit'">
                       <button class="bby-button" type="button" :disabled="saving || replacing" @click="discardManualEdit">
-                        <Icon name="undo" /> 放弃修改
+                        <Icon name="undo" /> Discard changes
                       </button>
                       <button
                         class="bby-button bby-primary"
@@ -1855,12 +1855,12 @@ function onOverlayClick(event: MouseEvent): void {
                         :disabled="saving || replacing || generating || !editDirty"
                         @click="saveManualEdit"
                       >
-                        <Icon name="check" /> {{ saving ? '保存中…' : '保存到楼层' }}
+                        <Icon name="check" /> {{ saving ? 'Saving…' : 'Save to message' }}
                       </button>
                     </template>
                     <template v-else-if="workMode === 'multi'">
                       <button class="bby-button" type="button" @click="cancelMultiSelect">
-                        <Icon name="undo" /> 取消
+                        <Icon name="undo" /> Cancel
                       </button>
                       <button
                         class="bby-button bby-primary"
@@ -1868,7 +1868,7 @@ function onOverlayClick(event: MouseEvent): void {
                         :disabled="!multiSelected.length || !bulkFilled"
                         @click="applyBulkAnnotation"
                       >
-                        <Icon name="check" /> 应用到 {{ multiSelected.length }} 段
+                        <Icon name="check" /> Apply to {{ multiSelected.length }} paragraphs
                       </button>
                     </template>
                     <button
@@ -1897,13 +1897,13 @@ function onOverlayClick(event: MouseEvent): void {
 
             <main v-else-if="ui.page === 'floors'" key="floors" class="bby-settings bby-page-shell">
               <header class="bby-settings-page-head">
-                <h2>选择楼层</h2>
+                <h2>Choose a message</h2>
                 <div v-if="floorChatOpen" class="bby-floor-head-actions">
                   <button
                     class="bby-floor-search-toggle"
                     :class="{ 'is-active': floorSearchOpen }"
                     type="button"
-                    title="搜索楼层"
+                    title="Search messages"
                     @mousedown.prevent
                     @click="toggleFloorSearch"
                   >
@@ -1911,7 +1911,7 @@ function onOverlayClick(event: MouseEvent): void {
                   </button>
                   <label class="bby-floor-user-toggle">
                     <input v-model="penSettings.showUserFloors" type="checkbox" class="bby-checkbox" />
-                    <span>显示 User 消息</span>
+                    <span>Show User messages</span>
                   </label>
                 </div>
               </header>
@@ -1924,14 +1924,14 @@ function onOverlayClick(event: MouseEvent): void {
                       v-model="floorQuery"
                       class="bby-input"
                       type="text"
-                      placeholder="搜索楼层号或关键词"
+                      placeholder="Search message number or keyword"
                       @blur="onFloorSearchBlur"
                       @keydown.esc.stop="closeFloorSearch"
                     />
                   </div>
                 </Transition>
                 <div class="bby-floor-list">
-                  <p v-if="!floorChatOpen" class="bby-field-hint">请先进入一个聊天，之后即可选择需要改写的楼层。</p>
+                  <p v-if="!floorChatOpen" class="bby-field-hint">Open a chat first, then choose the message to rewrite.</p>
                   <template v-else>
                     <div
                       v-for="row in pagedFloorRows"
@@ -1947,12 +1947,12 @@ function onOverlayClick(event: MouseEvent): void {
                         <span class="bby-floor-tags">
                           <span class="bby-floor-tag bby-floor-tag-num">#{{ row.floor }}</span>
                           <span class="bby-floor-tag bby-floor-role">{{ row.isUser ? 'User' : 'Char' }}</span>
-                          <Icon v-if="row.hidden" name="ghost" class="bby-floor-ghost" title="已隐藏楼层（不参与上下文）" />
+                          <Icon v-if="row.hidden" name="ghost" class="bby-floor-ghost" title="Hidden message (excluded from context)" />
                           <span class="bby-floor-actions">
                             <button
                               class="bby-floor-action"
                               type="button"
-                              :title="shootingFloor === row.floor ? '截图中…' : '截图该楼层'"
+                              :title="shootingFloor === row.floor ? 'Capturing…' : 'Screenshot this message'"
                               :disabled="shootingFloor != null"
                               @click.stop="onShootFloor(row.floor)"
                             >
@@ -1964,7 +1964,7 @@ function onOverlayClick(event: MouseEvent): void {
                             <button
                               class="bby-floor-action"
                               type="button"
-                              :title="row.hidden ? '显示楼层' : '隐藏楼层'"
+                              :title="row.hidden ? 'Show message' : 'Hide message'"
                               @click.stop="onToggleFloorHidden(row.floor)"
                             >
                               <Icon :name="row.hidden ? 'eyeOff' : 'eye'" />
@@ -1972,7 +1972,7 @@ function onOverlayClick(event: MouseEvent): void {
                             <button
                               class="bby-floor-action"
                               type="button"
-                              title="删除该层及之后楼层"
+                              title="Delete this message and all after it"
                               @click.stop="onDeleteFloor(row.floor)"
                             >
                               <Icon name="trash" />
@@ -1982,19 +1982,19 @@ function onOverlayClick(event: MouseEvent): void {
                         <small>{{ row.preview }}</small>
                       </span>
                     </div>
-                    <p v-if="!floorRows.length" class="bby-field-hint">当前聊天没有可改写的楼层。</p>
-                    <p v-else-if="!visibleFloorRows.length" class="bby-field-hint">当前聊天没有 AI 楼层。</p>
-                    <p v-else-if="!filteredFloorRows.length" class="bby-field-hint">没有匹配的楼层。</p>
+                    <p v-if="!floorRows.length" class="bby-field-hint">No messages to rewrite in this chat.</p>
+                    <p v-else-if="!visibleFloorRows.length" class="bby-field-hint">No AI messages in this chat.</p>
+                    <p v-else-if="!filteredFloorRows.length" class="bby-field-hint">No matching messages.</p>
                   </template>
                 </div>
               </div>
               <div v-if="floorChatOpen && floorPageCount > 1" class="bby-floor-pager">
                 <span class="bby-floor-pager-info">{{ floorPagerInfo }}</span>
                 <div class="bby-floor-pager-buttons">
-                  <button class="bby-icon-mini" type="button" title="上一页" :disabled="floorPage === 0" @click="floorPage--">
+                  <button class="bby-icon-mini" type="button" title="Previous" :disabled="floorPage === 0" @click="floorPage--">
                     <Icon name="chevronLeft" />
                   </button>
-                  <button class="bby-icon-mini" type="button" title="下一页" :disabled="floorPage >= floorPageCount - 1" @click="floorPage++">
+                  <button class="bby-icon-mini" type="button" title="Next" :disabled="floorPage >= floorPageCount - 1" @click="floorPage++">
                     <Icon name="chevronRight" />
                   </button>
                 </div>
@@ -2003,38 +2003,38 @@ function onOverlayClick(event: MouseEvent): void {
 
             <main v-else key="settings" class="bby-settings bby-page-shell">
               <header class="bby-settings-page-head">
-                <h2>设置</h2>
+                <h2>Settings</h2>
                 <div class="bby-ver-group">
                   <button class="bby-ver" type="button" :disabled="updateState.checking"
-                    :title="updateState.checking ? '正在检查更新' : '点击检查更新'"
+                    :title="updateState.checking ? 'Checking for updates' : 'Click to check for updates'"
                     @click="checkForUpdate(true)">
                     v{{ updateState.current || '—' }}
                   </button>
                   <button v-if="updateState.available" class="bby-button bby-primary bby-btn-sm" type="button"
-                    :disabled="updateState.updating" :title="`更新到 v${updateState.latest}`" @click="openUpdateConfirm">
-                    {{ updateState.updating ? '更新中…' : '更新' }}
+                    :disabled="updateState.updating" :title="`Update to v${updateState.latest}`" @click="openUpdateConfirm">
+                    {{ updateState.updating ? 'Updating…' : 'Update' }}
                   </button>
                 </div>
               </header>
 
               <div class="bby-settings-sections">
-                <Collapsible title="基本设置">
+                <Collapsible title="Basic settings">
                   <label class="bby-modal-field">
-                    <span class="bby-modal-label">默认渠道</span>
+                    <span class="bby-modal-label">Default channel</span>
                     <select v-model="penSettings.defaultChannelId" class="bby-input bby-select">
-                      <option value="">跟随主 API</option>
+                      <option value="">Follow main API</option>
                       <option v-for="channel in channels" :key="channel.id" :value="channel.id">
                         {{ channel.name }} · {{ channel.model }}
                       </option>
                     </select>
                   </label>
                   <label class="bby-modal-field bby-setting-gap">
-                    <span class="bby-modal-label">默认上下文轮数</span>
+                    <span class="bby-modal-label">Default context rounds</span>
                     <input v-model.number="penSettings.defaultContextRounds" class="bby-input" type="number" min="0" max="10" step="1" />
-                    <span class="bby-field-hint">每轮包含上一条 AI 消息和紧随其后的用户输入。</span>
+                    <span class="bby-field-hint">Each round includes the previous AI message and the user input right after it.</span>
                   </label>
                   <div class="bby-field bby-setting-gap">
-                    <div class="bby-field-head"><span class="bby-modal-label">主题</span></div>
+                    <div class="bby-field-head"><span class="bby-modal-label">Theme</span></div>
                     <div class="bby-segmented bby-segmented-wrap">
                       <button
                         v-for="theme in THEMES"
@@ -2050,39 +2050,38 @@ function onOverlayClick(event: MouseEvent): void {
                   </div>
                 </Collapsible>
 
-                <Collapsible title="副 API">
+                <Collapsible title="Secondary API">
                   <div v-if="sharingState.mode === 'legacy-readonly'" class="bby-channel-compat">
                     <p class="bby-field-hint">
-                      检测到旧版柏宝书{{ sharingState.bookVersion ? ` v${sharingState.bookVersion}` : '' }}。更新到 v1.1.3
-                      后，两边即可共同编辑同一份渠道列表。
+                      Old BaiBai-Book version detected{{ sharingState.bookVersion ? ` v${sharingState.bookVersion}` : '' }}. After updating to v1.1.3, both extensions can edit the same channel list.
                     </p>
                     <button class="bby-button bby-primary bby-btn-sm" type="button" @click="requestBookUpdate">
-                      <Icon name="refresh" /> 更新柏宝书
+                      <Icon name="refresh" /> Update BaiBai-Book
                     </button>
                   </div>
                   <div class="bby-channel-bar">
-                    <span class="bby-field-label">渠道</span>
+                    <span class="bby-field-label">Channels</span>
                     <button class="bby-button bby-primary bby-btn-sm" type="button" :disabled="!canEditChannels()" @click="openChannel()">
-                      <Icon name="plus" /> 添加渠道
+                      <Icon name="plus" /> Add channel
                     </button>
                   </div>
                   <ul v-if="channels.length" class="bby-channel-list">
                     <li v-for="channel in channels" :key="channel.id" class="bby-channel-item">
                       <button class="bby-channel-open" type="button" @click="openChannel(channel)">
-                        <span class="bby-channel-name">{{ channel.name || '未命名渠道' }}</span>
-                        <span class="bby-channel-model">{{ channel.model || '未设模型' }}</span>
+                        <span class="bby-channel-name">{{ channel.name || 'Unnamed channel' }}</span>
+                        <span class="bby-channel-model">{{ channel.model || 'No model set' }}</span>
                       </button>
                     </li>
                   </ul>
-                  <p v-else-if="!sharingState.ready" class="bby-field-hint">正在载入渠道…</p>
-                  <p v-else class="bby-field-hint">还没有渠道。可以添加副 API，或直接跟随主 API。</p>
+                  <p v-else-if="!sharingState.ready" class="bby-field-hint">Loading channels…</p>
+                  <p v-else class="bby-field-hint">No channels yet. Add a secondary API, or just follow the main API.</p>
                 </Collapsible>
 
-                <Collapsible title="快捷语句">
+                <Collapsible title="Quick phrases">
                   <div class="bby-section-action">
-                    <span class="bby-field-label">标注模板</span>
+                    <span class="bby-field-label">Annotation templates</span>
                     <button class="bby-button bby-primary bby-btn-sm" type="button" @click="openPhrase()">
-                      <Icon name="plus" /> 添加语句
+                      <Icon name="plus" /> Add phrase
                     </button>
                   </div>
                   <div v-if="phrases.length" class="bby-phrase-list">
@@ -2095,16 +2094,16 @@ function onOverlayClick(event: MouseEvent): void {
                       <Icon name="chevron" />
                     </button>
                   </div>
-                  <p v-else class="bby-field-hint">尚未添加快捷语句。</p>
+                  <p v-else class="bby-field-hint">No quick phrases yet.</p>
                 </Collapsible>
 
-                <Collapsible title="自定义提示词">
+                <Collapsible title="Custom prompts">
                   <ul class="bby-prompt-list">
                     <li v-for="meta in PROMPT_METAS" :key="meta.key" class="bby-prompt-item">
                       <button class="bby-prompt-open" type="button" @click="openPrompt(meta)">
                         <span class="bby-prompt-name">{{ meta.label }}</span>
                         <span class="bby-prompt-state" :class="{ 'is-custom': isCustomPrompt(meta.key) }">
-                          {{ isCustomPrompt(meta.key) ? '已自定义' : '默认' }}
+                          {{ isCustomPrompt(meta.key) ? 'Customized' : 'Default' }}
                         </span>
                         <Icon name="pen" class="bby-prompt-edit" />
                       </button>
@@ -2116,16 +2115,16 @@ function onOverlayClick(event: MouseEvent): void {
           </Transition>
           </div>
 
-          <nav class="bby-mobile-nav" aria-label="移动端导航">
-            <button :class="{ 'is-active': ui.page === 'floors' }" type="button" title="楼层" aria-label="楼层" @click="onMobileNavClick('floors')">
+          <nav class="bby-mobile-nav" aria-label="Mobile navigation">
+            <button :class="{ 'is-active': ui.page === 'floors' }" type="button" title="Messages" aria-label="Messages" @click="onMobileNavClick('floors')">
               <Icon name="list" />
             </button>
-            <button :class="{ 'is-active': ui.page === 'workspace' }" type="button" :disabled="ui.floor == null" title="工作台" aria-label="工作台" @click="onMobileNavClick('workspace')">
+            <button :class="{ 'is-active': ui.page === 'workspace' }" type="button" :disabled="ui.floor == null" title="Workbench" aria-label="Workbench" @click="onMobileNavClick('workspace')">
               <Icon name="workspace" />
             </button>
-            <button :class="{ 'is-active': ui.page === 'settings' }" type="button" title="设置" aria-label="设置" @click="onMobileNavClick('settings')">
+            <button :class="{ 'is-active': ui.page === 'settings' }" type="button" title="Settings" aria-label="Settings" @click="onMobileNavClick('settings')">
               <Icon name="settings" />
-              <span v-if="updateState.available" class="bby-nav-dot" aria-label="有可用更新"></span>
+              <span v-if="updateState.available" class="bby-nav-dot" aria-label="Update available"></span>
             </button>
           </nav>
         </section>
@@ -2133,36 +2132,36 @@ function onOverlayClick(event: MouseEvent): void {
     </Transition>
 
     <ModalMask :open="!!channelDraft" @close="channelDraft = null">
-      <div v-if="channelDraft" class="bby-modal" role="dialog" aria-modal="true" aria-label="编辑渠道">
+      <div v-if="channelDraft" class="bby-modal" role="dialog" aria-modal="true" aria-label="Edit channel">
         <header class="bby-modal-head">
-          <span class="bby-modal-title">编辑渠道</span>
-          <button class="bby-icon-mini" type="button" title="关闭" @click="channelDraft = null"><Icon name="close" /></button>
+          <span class="bby-modal-title">Edit channel</span>
+          <button class="bby-icon-mini" type="button" title="Close" @click="channelDraft = null"><Icon name="close" /></button>
         </header>
         <label class="bby-modal-field">
-          <span class="bby-modal-label">渠道名</span>
-          <input v-model="channelDraft.name" class="bby-input" placeholder="渠道名" />
+          <span class="bby-modal-label">Channel name</span>
+          <input v-model="channelDraft.name" class="bby-input" placeholder="Channel name" />
         </label>
         <label class="bby-modal-field">
-          <span class="bby-modal-label">API 地址</span>
-          <input v-model="channelDraft.url" class="bby-input" placeholder="如 https://api.openai.com/v1" />
+          <span class="bby-modal-label">API URL</span>
+          <input v-model="channelDraft.url" class="bby-input" placeholder="e.g. https://api.openai.com/v1" />
         </label>
         <label class="bby-modal-field">
-          <span class="bby-modal-label">API 密钥</span>
+          <span class="bby-modal-label">API key</span>
           <div class="bby-model-row">
-            <input v-model="channelDraft.key" class="bby-input" :type="showKey ? 'text' : 'password'" placeholder="API 密钥" />
-            <button class="bby-icon-mini" type="button" :title="showKey ? '隐藏密钥' : '显示密钥'" @click="showKey = !showKey">
+            <input v-model="channelDraft.key" class="bby-input" :type="showKey ? 'text' : 'password'" placeholder="API key" />
+            <button class="bby-icon-mini" type="button" :title="showKey ? 'Hide key' : 'Show key'" @click="showKey = !showKey">
               <Icon :name="showKey ? 'eyeOff' : 'eye'" />
             </button>
           </div>
         </label>
         <label class="bby-modal-field">
-          <span class="bby-modal-label">模型</span>
+          <span class="bby-modal-label">Model</span>
           <div class="bby-model-row">
             <div class="bby-combo">
               <input
                 v-model="channelDraft.model"
                 class="bby-input"
-                :placeholder="modelOptions.length ? '搜索或输入模型名…' : '模型名，如 gpt-4o-mini'"
+                :placeholder="modelOptions.length ? 'Search or enter a model name…' : 'Model name, e.g. gpt-4o-mini'"
                 @focus="openModelMenu"
                 @input="modelQuery = channelDraft.model; modelMenuOpen = true"
                 @blur="closeModelMenuSoon"
@@ -2174,7 +2173,7 @@ function onOverlayClick(event: MouseEvent): void {
                 aria-hidden="true"
               />
               <ul v-if="modelMenuOpen && modelOptions.length" class="bby-combo-menu">
-                <li v-if="!filteredModelOptions.length" class="bby-combo-empty">无匹配模型</li>
+                <li v-if="!filteredModelOptions.length" class="bby-combo-empty">No matching models</li>
                 <li
                   v-for="model in filteredModelOptions"
                   :key="model"
@@ -2189,7 +2188,7 @@ function onOverlayClick(event: MouseEvent): void {
             <button
               class="bby-icon-mini"
               type="button"
-              :title="loadingModels ? '拉取中…' : '拉取模型'"
+              :title="loadingModels ? 'Fetching…' : 'Fetch models'"
               :disabled="loadingModels"
               @click="loadModels"
             >
@@ -2199,154 +2198,152 @@ function onOverlayClick(event: MouseEvent): void {
         </label>
         <div class="bby-channel-row">
           <label class="bby-mini-field">
-            <span>温度</span>
+            <span>Temperature</span>
             <input v-model.number="channelDraft.temperature" class="bby-input" type="number" step="0.1" min="0" max="2" />
           </label>
           <label class="bby-mini-field">
-            <span>最大 token</span>
+            <span>Max tokens</span>
             <input v-model.number="channelDraft.maxTokens" class="bby-input" type="number" step="256" min="256" />
           </label>
           <label class="bby-mini-field">
-            <span>超时（秒）</span>
+            <span>Timeout (seconds)</span>
             <input v-model.number="channelDraft.timeoutSec" class="bby-input" type="number" step="10" min="1" />
           </label>
           <!-- 思考强度：自绘下拉（跟随主题；原生 select 的弹出层由系统渲染，主题管不到）。
                auto 是显式选项，值为空串 = 不发送该参数 -->
           <div class="bby-mini-field">
-            <span>思考强度</span>
+            <span>Reasoning effort</span>
             <BbySelect
               v-model="channelDraft.reasoningEffort"
               :options="REASONING_EFFORT_OPTIONS"
-              aria-label="思考强度"
+              aria-label="Reasoning effort"
             />
           </div>
         </div>
-        <span class="bby-field-hint">思考强度不知道的就选 auto，DS 系推荐 max</span>
+        <span class="bby-field-hint">If unsure, choose auto; max is recommended for DeepSeek models</span>
         <label class="bby-switch-row">
-          <span class="bby-modal-label">流式传输</span>
+          <span class="bby-modal-label">Streaming</span>
           <input v-model="channelDraft.stream" type="checkbox" class="bby-checkbox" />
         </label>
         <label class="bby-switch-row">
-          <span class="bby-modal-label">发送预填充</span>
+          <span class="bby-modal-label">Send prefill</span>
           <input v-model="channelDraft.prefill" type="checkbox" class="bby-checkbox" />
         </label>
         <label class="bby-modal-field">
-          <span class="bby-modal-label">排除参数</span>
-          <input v-model="excludeParamsText" class="bby-input" placeholder="逗号分隔，如 temperature, max_tokens" />
+          <span class="bby-modal-label">Excluded parameters</span>
+          <input v-model="excludeParamsText" class="bby-input" placeholder="Comma-separated, e.g. temperature, max_tokens" />
         </label>
         <p v-if="testMessage" class="bby-channel-test">{{ testMessage }}</p>
         <footer class="bby-modal-foot">
-          <button class="bby-button bby-danger" type="button" @click="removeChannel"><Icon name="trash" /> 删除</button>
+          <button class="bby-button bby-danger" type="button" @click="removeChannel"><Icon name="trash" /> Delete</button>
           <span class="bby-modal-foot-spacer"></span>
-          <button class="bby-button" type="button" @click="testChannel"><Icon name="plug" /> 测试渠道</button>
-          <button class="bby-button bby-primary" type="button" @click="saveChannel">完成</button>
+          <button class="bby-button" type="button" @click="testChannel"><Icon name="plug" /> Test channel</button>
+          <button class="bby-button bby-primary" type="button" @click="saveChannel">Done</button>
         </footer>
       </div>
     </ModalMask>
 
     <ModalMask :open="bookUpdatePromptOpen" @close="bookUpdatePromptOpen = false">
-      <div class="bby-modal" role="dialog" aria-modal="true" aria-label="更新柏宝书">
+      <div class="bby-modal" role="dialog" aria-modal="true" aria-label="Update BaiBai-Book">
         <header class="bby-modal-head">
-          <span class="bby-modal-title">更新柏宝书</span>
-          <button class="bby-icon-mini" type="button" title="关闭" @click="bookUpdatePromptOpen = false"><Icon name="close" /></button>
+          <span class="bby-modal-title">Update BaiBai-Book</span>
+          <button class="bby-icon-mini" type="button" title="Close" @click="bookUpdatePromptOpen = false"><Icon name="close" /></button>
         </header>
         <p class="bby-field-hint">
-          当前柏宝书{{ sharingState.bookVersion ? `版本为 v${sharingState.bookVersion}` : '版本无法确认' }}。需要更新到
-          v1.1.3，才能与柏宝砚实时共用并编辑渠道。更新成功后页面会自动刷新，现有渠道会自动迁移。
+          Current BaiBai-Book{{ sharingState.bookVersion ? ` version is v${sharingState.bookVersion}` : ' version cannot be determined' }}. Update to v1.1.3 to share and edit channels live with BaiBai Inkwell. The page reloads automatically after the update, and existing channels are migrated automatically.
         </p>
-        <p v-if="sharingState.updateError" class="bby-channel-test">更新失败：{{ sharingState.updateError }}</p>
+        <p v-if="sharingState.updateError" class="bby-channel-test">Update failed:{{ sharingState.updateError }}</p>
         <footer class="bby-modal-foot">
           <span class="bby-modal-foot-spacer"></span>
-          <button class="bby-button" type="button" :disabled="sharingState.updating" @click="bookUpdatePromptOpen = false">暂不更新</button>
+          <button class="bby-button" type="button" :disabled="sharingState.updating" @click="bookUpdatePromptOpen = false">Not now</button>
           <button class="bby-button bby-primary" type="button" :disabled="sharingState.updating" @click="performBookUpdate">
-            <Icon name="refresh" /> {{ sharingState.updating ? '更新中…' : '更新并刷新' }}
+            <Icon name="refresh" /> {{ sharingState.updating ? 'Updating…' : 'Update and reload' }}
           </button>
         </footer>
       </div>
     </ModalMask>
 
     <ModalMask :open="updateConfirmOpen" @close="updateConfirmOpen = false">
-      <div class="bby-modal" role="dialog" aria-modal="true" aria-label="发现新版本">
+      <div class="bby-modal" role="dialog" aria-modal="true" aria-label="New version available">
         <header class="bby-modal-head">
-          <span class="bby-modal-title">发现新版本</span>
-          <button class="bby-icon-mini" type="button" title="关闭" @click="updateConfirmOpen = false"><Icon name="close" /></button>
+          <span class="bby-modal-title">New version available</span>
+          <button class="bby-icon-mini" type="button" title="Close" @click="updateConfirmOpen = false"><Icon name="close" /></button>
         </header>
         <p class="bby-field-hint">
-          当前版本 v{{ updateState.current || '—' }}，最新版本 v{{ updateState.latest }}。
-          现在更新吗？更新完成后会自动刷新页面生效。
+          Current version v{{ updateState.current || '—' }}, latest version v{{ updateState.latest }}. Update now? The page reloads automatically after the update.
         </p>
         <footer class="bby-modal-foot">
           <span class="bby-modal-foot-spacer"></span>
-          <button class="bby-button" type="button" :disabled="updateState.updating" @click="updateConfirmOpen = false">暂不更新</button>
+          <button class="bby-button" type="button" :disabled="updateState.updating" @click="updateConfirmOpen = false">Not now</button>
           <button class="bby-button bby-primary" type="button" :disabled="updateState.updating" @click="confirmUpdate">
-            <Icon name="refresh" /> {{ updateState.updating ? '更新中…' : '更新并刷新' }}
+            <Icon name="refresh" /> {{ updateState.updating ? 'Updating…' : 'Update and reload' }}
           </button>
         </footer>
       </div>
     </ModalMask>
 
     <ModalMask :open="!!phraseDraft" @close="phraseDraft = null">
-      <div v-if="phraseDraft" class="bby-modal" role="dialog" aria-modal="true" aria-label="编辑快捷语句">
+      <div v-if="phraseDraft" class="bby-modal" role="dialog" aria-modal="true" aria-label="Edit quick phrase">
         <header class="bby-modal-head">
-          <span class="bby-modal-title">编辑快捷语句</span>
-          <button class="bby-icon-mini" type="button" title="关闭" @click="phraseDraft = null"><Icon name="close" /></button>
+          <span class="bby-modal-title">Edit quick phrase</span>
+          <button class="bby-icon-mini" type="button" title="Close" @click="phraseDraft = null"><Icon name="close" /></button>
         </header>
         <label class="bby-modal-field">
-          <span class="bby-modal-label">名称</span>
-          <input v-model="phraseDraft.name" class="bby-input" placeholder="例如：增强情绪" />
+          <span class="bby-modal-label">Name</span>
+          <input v-model="phraseDraft.name" class="bby-input" placeholder="e.g. Stronger emotion" />
         </label>
         <label class="bby-modal-field">
-          <span class="bby-modal-label">指令</span>
+          <span class="bby-modal-label">Instruction</span>
           <textarea v-model="phraseDraft.instruction" class="bby-input bby-phrase-area"></textarea>
         </label>
         <label class="bby-switch-row">
-          <span class="bby-modal-label">置顶显示</span>
+          <span class="bby-modal-label">Pin to top</span>
           <input v-model="phraseDraft.favorite" type="checkbox" class="bby-checkbox" />
         </label>
         <footer class="bby-modal-foot">
-          <button class="bby-button bby-danger" type="button" @click="removePhrase"><Icon name="trash" /> 删除</button>
+          <button class="bby-button bby-danger" type="button" @click="removePhrase"><Icon name="trash" /> Delete</button>
           <span class="bby-modal-foot-spacer"></span>
-          <button class="bby-button bby-primary" type="button" @click="savePhrase">完成</button>
+          <button class="bby-button bby-primary" type="button" @click="savePhrase">Done</button>
         </footer>
       </div>
     </ModalMask>
 
     <ModalMask :open="!!ruleDraft" @close="ruleDraft = null">
-      <div v-if="ruleDraft" class="bby-modal" role="dialog" aria-modal="true" aria-label="编辑替换规则">
+      <div v-if="ruleDraft" class="bby-modal" role="dialog" aria-modal="true" aria-label="Edit replacement rule">
         <header class="bby-modal-head">
-          <span class="bby-modal-title">编辑替换规则</span>
-          <button class="bby-icon-mini" type="button" title="关闭" @click="ruleDraft = null"><Icon name="close" /></button>
+          <span class="bby-modal-title">Edit replacement rule</span>
+          <button class="bby-icon-mini" type="button" title="Close" @click="ruleDraft = null"><Icon name="close" /></button>
         </header>
         <label class="bby-modal-field">
-          <span class="bby-modal-label">规则名</span>
-          <input v-model="ruleDraft.name" class="bby-input" placeholder="例如：统一角色名" />
+          <span class="bby-modal-label">Rule name</span>
+          <input v-model="ruleDraft.name" class="bby-input" placeholder="e.g. Unify character name" />
         </label>
         <label class="bby-modal-field">
-          <span class="bby-modal-label">匹配内容</span>
-          <input v-model="ruleDraft.pattern" class="bby-input bby-mono" placeholder="文字、正则或 /pattern/gi" />
+          <span class="bby-modal-label">Match</span>
+          <input v-model="ruleDraft.pattern" class="bby-input bby-mono" placeholder="Text, regex or /pattern/gi" />
         </label>
         <label class="bby-modal-field">
-          <span class="bby-modal-label">替换为</span>
-          <input v-model="ruleDraft.replacement" class="bby-input bby-mono" placeholder="留空则删除匹配内容" />
+          <span class="bby-modal-label">Replace with</span>
+          <input v-model="ruleDraft.replacement" class="bby-input bby-mono" placeholder="Leave empty to delete the match" />
         </label>
         <label class="bby-switch-row">
-          <span class="bby-modal-label">使用正则表达式</span>
+          <span class="bby-modal-label">Use regular expression</span>
           <input v-model="ruleDraft.isRegex" type="checkbox" class="bby-checkbox" />
         </label>
-        <p v-if="ruleDraft.isRegex" class="bby-field-hint">支持纯表达式或 /表达式/gi；全局替换所有匹配，可用 $1、$2 引用捕获组。</p>
+        <p v-if="ruleDraft.isRegex" class="bby-field-hint">Plain expressions or /expression/gi are supported; all matches are replaced, and $1, $2 refer to capture groups.</p>
         <footer class="bby-modal-foot">
-          <button class="bby-button bby-danger" type="button" @click="removeRule"><Icon name="trash" /> 删除</button>
+          <button class="bby-button bby-danger" type="button" @click="removeRule"><Icon name="trash" /> Delete</button>
           <span class="bby-modal-foot-spacer"></span>
-          <button class="bby-button bby-primary" type="button" @click="saveRule">完成</button>
+          <button class="bby-button bby-primary" type="button" @click="saveRule">Done</button>
         </footer>
       </div>
     </ModalMask>
 
     <ModalMask :open="!!editingPrompt" @close="closePrompt">
-      <div v-if="editingPrompt" class="bby-modal bby-modal-wide" role="dialog" aria-modal="true" :aria-label="`编辑${editingPrompt.label}`">
+      <div v-if="editingPrompt" class="bby-modal bby-modal-wide" role="dialog" aria-modal="true" :aria-label="`Edit ${editingPrompt.label}`">
         <header class="bby-modal-head">
-          <span class="bby-modal-title">编辑{{ editingPrompt.label }}</span>
-          <button class="bby-icon-mini" type="button" title="关闭" @click="closePrompt"><Icon name="close" /></button>
+          <span class="bby-modal-title">Edit{{ editingPrompt.label }}</span>
+          <button class="bby-icon-mini" type="button" title="Close" @click="closePrompt"><Icon name="close" /></button>
         </header>
         <p class="bby-field-hint">{{ editingPrompt.hint }}</p>
         <textarea
@@ -2357,11 +2354,11 @@ function onOverlayClick(event: MouseEvent): void {
         ></textarea>
         <footer class="bby-modal-foot">
           <button class="bby-button bby-danger" type="button" @click="resetPrompt">
-            <Icon name="refresh" /> 恢复默认
+            <Icon name="refresh" /> Restore default
           </button>
           <span class="bby-modal-foot-spacer"></span>
-          <button class="bby-button" type="button" @click="closePrompt">取消</button>
-          <button class="bby-button bby-primary" type="button" @click="savePrompt">完成</button>
+          <button class="bby-button" type="button" @click="closePrompt">Cancel</button>
+          <button class="bby-button bby-primary" type="button" @click="savePrompt">Done</button>
         </footer>
       </div>
     </ModalMask>

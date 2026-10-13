@@ -43,7 +43,7 @@ export function openFloorInPen(floor: number): boolean {
   openPen(
     chatMessage.mes ?? '',
     floor,
-    chatMessage.name || (chatMessage.is_user ? '你' : 'AI'),
+    chatMessage.name || (chatMessage.is_user ? 'You' : 'AI'),
     context.getCurrentChatId?.() ?? '',
   );
   return true;
@@ -81,7 +81,7 @@ async function refreshRenderedMessage(
   try {
     await context.reloadCurrentChat?.();
   } catch (error) {
-    console.warn('[柏宝砚] 楼层已保存，但界面刷新失败', error);
+    console.warn('[BaiBai Inkwell] Message saved, but the UI refresh failed', error);
   }
 }
 
@@ -134,12 +134,12 @@ export async function applyFloorText(
   }
 
   await emitMessageEvent(context, context.eventTypes?.MESSAGE_EDITED, floor).catch(error => {
-    console.warn('[柏宝砚] 楼层已保存，但 MESSAGE_EDITED 事件发送失败', error);
+    console.warn('[BaiBai Inkwell] Message saved, but sending the MESSAGE_EDITED event failed', error);
   });
   if (!settleActiveEditor(floor, message.mes)) {
     await refreshRenderedMessage(context, message, floor);
     await emitMessageEvent(context, context.eventTypes?.MESSAGE_UPDATED, floor).catch(error => {
-      console.warn('[柏宝砚] 楼层已保存，但 MESSAGE_UPDATED 事件发送失败', error);
+      console.warn('[BaiBai Inkwell] Message saved, but sending the MESSAGE_UPDATED event failed', error);
     });
   }
   return 'saved';

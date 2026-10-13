@@ -7,7 +7,7 @@ type SlashRunner = NonNullable<STContext['executeSlashCommandsWithOptions']>;
 function requireSlashRunner(context: STContext | null): SlashRunner {
   const run = context?.executeSlashCommandsWithOptions;
   if (typeof run !== 'function') {
-    throw new Error('当前酒馆版本未暴露斜杠命令执行接口');
+    throw new Error('This SillyTavern version does not expose the slash command API');
   }
   return run;
 }
@@ -16,7 +16,7 @@ function requireSlashRunner(context: STContext | null): SlashRunner {
 export async function toggleFloorHidden(floor: number): Promise<boolean> {
   const context = getContext();
   const message = context?.chat?.[floor];
-  if (!message) throw new Error('楼层不存在');
+  if (!message) throw new Error('Message does not exist');
 
   const run = requireSlashRunner(context);
   const willHide = !message.is_system;
@@ -26,13 +26,13 @@ export async function toggleFloorHidden(floor: number): Promise<boolean> {
   });
 
   if (result?.isError) {
-    throw new Error(result.errorMessage || '斜杠命令执行失败');
+    throw new Error(result.errorMessage || 'Slash command failed');
   }
   return willHide;
 }
 
 async function confirmFloorDelete(context: STContext, floor: number): Promise<boolean> {
-  const message = `将删除第 ${floor} 层及之后的楼层，删除后无法撤销。确定继续吗？`;
+  const message = `This deletes message ${floor} and every message after it. This cannot be undone. Continue?`;
   if (typeof context.callGenericPopup === 'function' && context.POPUP_TYPE && 'CONFIRM' in context.POPUP_TYPE) {
     return Boolean(await context.callGenericPopup(message, context.POPUP_TYPE.CONFIRM));
   }
@@ -46,7 +46,7 @@ async function confirmFloorDelete(context: STContext, floor: number): Promise<bo
 export async function deleteFloorsFrom(floor: number): Promise<number> {
   const context = getContext();
   const chat = context?.chat;
-  if (!context || !chat?.[floor]) throw new Error('楼层不存在');
+  if (!context || !chat?.[floor]) throw new Error('Message does not exist');
 
   const run = requireSlashRunner(context);
   const deleteCount = chat.length - floor;
@@ -61,7 +61,7 @@ export async function deleteFloorsFrom(floor: number): Promise<number> {
   });
 
   if (result?.isError) {
-    throw new Error(result.errorMessage || '斜杠删除命令执行失败');
+    throw new Error(result.errorMessage || 'Slash delete command failed');
   }
   return deleteCount;
 }

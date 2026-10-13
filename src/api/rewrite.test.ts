@@ -59,13 +59,13 @@ describe('parseChanges', () => {
   it('still rejects repaired JSON without a string replacement', () => {
     const raw = '{"changes":[{"paragraph":1,"replacement":123,}]}';
 
-    expect(() => parseChanges(raw, '原段落')).toThrow('AI 没有返回任何有效的段落修改');
+    expect(() => parseChanges(raw, '原段落')).toThrow('The AI returned no valid paragraph changes');
   });
 
   it('rejects a replacement containing a line break', () => {
     const raw = '{"changes":[{"paragraph":1,"replacement":"第一行\\n第二行"}]}';
 
-    expect(() => parseChanges(raw, '原段落')).toThrow('AI 没有返回任何有效的段落修改');
+    expect(() => parseChanges(raw, '原段落')).toThrow('The AI returned no valid paragraph changes');
   });
 
   it('extracts JSON from answer tags without reading braces in the think block', () => {

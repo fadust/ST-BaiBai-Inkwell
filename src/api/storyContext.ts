@@ -234,7 +234,7 @@ async function renderWorldInfoContent(
     const output = await ejs.evalTemplate(text, environment);
     if (typeof output === 'string') text = output;
   } catch (error) {
-    console.log('[柏宝砚] 世界书 EJS 渲染失败，使用宏展开后的文本：', error);
+    console.log('[BaiBai Inkwell] World Info EJS render failed; using macro-expanded text: ', error);
   }
   return text;
 }
@@ -281,7 +281,7 @@ async function fetchWorldInfo(scanText: string[], floor: number): Promise<string
       ),
     );
   } catch (error) {
-    console.log('[柏宝砚] 世界书激活失败，继续执行不带世界书的改写：', error);
+    console.log('[BaiBai Inkwell] World Info activation failed; continuing the rewrite without World Info: ', error);
     return '';
   }
 }
@@ -325,7 +325,7 @@ export async function collectRewriteStoryContext(
   options: RewriteStoryContextOptions = DEFAULT_REWRITE_STORY_CONTEXT_OPTIONS,
 ): Promise<RewriteStoryContext> {
   const context = getContext();
-  if (!context) throw new Error('SillyTavern 上下文不可用');
+  if (!context) throw new Error('SillyTavern context unavailable');
   const indices = selectHistoryIndices(context.chat, floor, contextRounds);
   const history = serializeRewriteHistory(
     context.chat,

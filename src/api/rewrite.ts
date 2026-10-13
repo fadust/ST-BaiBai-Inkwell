@@ -132,7 +132,7 @@ function extractJsonObject(raw: string): unknown {
   const content = (fenced?.[1] ?? text).trim();
   const start = content.indexOf('{');
   const end = content.lastIndexOf('}');
-  if (start < 0 || end < start) throw new Error('AI 未返回合法的段落补丁 JSON');
+  if (start < 0 || end < start) throw new Error('The AI did not return valid paragraph patch JSON');
   const candidate = content.slice(start, end + 1);
   try {
     return JSON.parse(candidate);
@@ -140,7 +140,7 @@ function extractJsonObject(raw: string): unknown {
     try {
       return JSON.parse(jsonrepair(candidate));
     } catch {
-      throw new Error('AI 返回的段落补丁 JSON 无法解析');
+      throw new Error('Could not parse the AI\'s paragraph patch JSON');
     }
   }
 }
@@ -151,7 +151,7 @@ export function parseChanges(raw: string, originalText: string): RewriteChange[]
     parsed && typeof parsed === 'object'
       ? (parsed as { changes?: unknown }).changes
       : undefined;
-  if (!Array.isArray(list)) throw new Error('AI 返回结果缺少 changes 数组');
+  if (!Array.isArray(list)) throw new Error('The AI result is missing the changes array');
 
   const paragraphs = splitParagraphs(originalText);
   const byParagraph = new Map<number, RewriteChange>();
@@ -167,7 +167,7 @@ export function parseChanges(raw: string, originalText: string): RewriteChange[]
     byParagraph.set(paragraph, { paragraph, replacement });
   }
   const changes = [...byParagraph.values()].sort((left, right) => left.paragraph - right.paragraph);
-  if (!changes.length) throw new Error('AI 没有返回任何有效的段落修改');
+  if (!changes.length) throw new Error('The AI returned no valid paragraph changes');
   return changes;
 }
 
