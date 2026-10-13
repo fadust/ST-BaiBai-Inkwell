@@ -483,7 +483,7 @@ const pagedFloorRows = computed<FloorPreviewRow[]>(() => {
     }));
 });
 const floorPagerInfo = computed(() => {
-  const head = floorQuery.value.trim() ? `${filteredFloorRows.value.length} matching messages` : `${visibleFloorRows.value.length} messages`;
+  const head = floorQuery.value.trim() ? `${filteredFloorRows.value.length} matching ${filteredFloorRows.value.length === 1 ? 'message' : 'messages'}` : `${visibleFloorRows.value.length} ${visibleFloorRows.value.length === 1 ? 'message' : 'messages'}`;
   return `${head} · page ${floorPage.value + 1} / ${floorPageCount.value}`;
 });
 
@@ -911,7 +911,7 @@ function applyBulkAnnotation(): void {
   bulkPhraseIds.value = [];
   bulkNote.value = '';
   workMode.value = 'annotate';
-  showToast(`Request applied to ${count} paragraphs`);
+  showToast(`Request applied to ${count} ${count === 1 ? 'paragraph' : 'paragraphs'}`);
 }
 
 function cancelMultiSelect(): void {
@@ -1266,7 +1266,7 @@ async function applyReplacement(result: ReplacementResult): Promise<void> {
     if (ui.floor === floor && ui.chatId === chatId) {
       openFloorInPen(floor);
     }
-    showToast(`Replaced ${result.count} occurrences`);
+    showToast(`Replaced ${result.count} ${result.count === 1 ? 'occurrence' : 'occurrences'}`);
   } catch (error) {
     showToast(error instanceof Error ? error.message : 'Replace failed');
   } finally {
@@ -1613,7 +1613,7 @@ function onOverlayClick(event: MouseEvent): void {
 
                       <div class="bby-rule-run">
                         <span class="bby-replace-summary">
-                          {{ enabledRuleCount ? `${enabledRuleCount} rules enabled` : 'No rules enabled' }}
+                          {{ enabledRuleCount ? `${enabledRuleCount} ${enabledRuleCount === 1 ? 'rule' : 'rules'} enabled` : 'No rules enabled' }}
                         </span>
                         <button
                           class="bby-button bby-btn-sm"
@@ -1798,7 +1798,7 @@ function onOverlayClick(event: MouseEvent): void {
                 aria-label="Batch annotation request"
               >
                 <div class="bby-para-editor-head">
-                  <span>{{ multiSelected.length ? `${multiSelected.length} paragraphs selected; enter a shared request` : 'Select paragraphs above first' }}</span>
+                  <span>{{ multiSelected.length ? `${multiSelected.length} ${multiSelected.length === 1 ? 'paragraph' : 'paragraphs'} selected; enter a shared request` : 'Select paragraphs above first' }}</span>
                 </div>
                 <PhrasePicker v-if="phrases.length" v-model="bulkPhraseIds" :phrases="phrases" />
                 <textarea
